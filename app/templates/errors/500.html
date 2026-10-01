@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}
+Erro interno
+{% endblock %}
+
+{% block content %}
+
+<div class="error-page">
+
+    <div class="error-card">
+
+        <div class="error-icon error-icon-danger">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+
+        <div class="error-code">
+            500
+        </div>
+
+        <h1 class="error-title">
+            Algo deu errado
+        </h1>
+
+        <p class="error-description">
+            Ocorreu um erro inesperado ao processar sua solicitação.
+            Tente novamente em alguns instantes.
+        </p>
+
+        <div class="error-actions">
+
+            <a
+                href="{{ url_for('main.dashboard') }}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-grid-1x2"></i>
+                Voltar ao Dashboard
+            </a>
+
+            <a
+                href="javascript:location.reload()"
+                class="btn btn-outline-secondary"
+            >
+                <i class="bi bi-arrow-clockwise"></i>
+                Tentar novamente
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

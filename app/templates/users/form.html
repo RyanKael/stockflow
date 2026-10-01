@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="users-form-header mb-4">
+
+    <div>
+        <h2 class="users-form-title mb-1">
+            Novo usuário
+        </h2>
+
+        <p class="users-form-subtitle mb-0">
+            Cadastre um novo usuário e defina o nível de acesso.
+        </p>
+    </div>
+
+    <a href="{{ url_for('users.list_users') }}" class="btn btn-outline-secondary users-form-back">
+        <i class="bi bi-arrow-left"></i>
+        Voltar
+    </a>
+
+</div>
+
+
+<div class="card shadow-sm users-form-card">
+
+    <div class="card-body">
+
+        <form method="POST">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Nome de usuário
+                    </label>
+
+                    <input type="text" name="username" class="form-control" required>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        E-mail
+                    </label>
+
+                    <input type="email" name="email" class="form-control" required>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Senha
+                    </label>
+
+                    <div class="users-password-input">
+
+                        <input type="password" name="password" id="user-password" class="form-control" minlength="8"
+                            required>
+
+                        <button type="button" class="users-password-toggle" id="toggle-user-password"
+                            aria-label="Mostrar senha">
+                            <i class="bi bi-eye"></i>
+                        </button>
+
+                    </div>
+
+                    <small class="form-text">
+                        Mínimo de 8 caracteres.
+                    </small>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Perfil
+                    </label>
+
+                    <select name="role" class="form-select" required>
+
+                        <option value="">
+                            Selecione...
+                        </option>
+
+                        <option value="Administrador">
+                            Administrador
+                        </option>
+
+                        <option value="Gerente">
+                            Gerente
+                        </option>
+
+                        <option value="Usuário">
+                            Usuário
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="users-form-actions">
+
+                <a href="{{ url_for('users.list_users') }}" class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-person-plus"></i>
+                    Criar Usuário
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const passwordInput =
+            document.getElementById("user-password");
+
+        const togglePassword =
+            document.getElementById("toggle-user-password");
+
+        if (!passwordInput || !togglePassword) {
+            return;
+        }
+
+        const icon =
+            togglePassword.querySelector("i");
+
+        togglePassword.addEventListener("click", function () {
+
+            const hidden =
+                passwordInput.type === "password";
+
+            passwordInput.type =
+                hidden ? "text" : "password";
+
+            icon.className =
+                hidden
+                    ? "bi bi-eye-slash"
+                    : "bi bi-eye";
+
+            togglePassword.setAttribute(
+                "aria-label",
+                hidden
+                    ? "Ocultar senha"
+                    : "Mostrar senha"
+            );
+
+        });
+
+    });
+</script>
+
+{% endblock %}

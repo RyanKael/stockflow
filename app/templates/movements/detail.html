@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+Detalhes da movimentação
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="movement-detail-page">
+
+    <!-- Cabeçalho -->
+    <div class="movement-detail-header mb-4">
+
+        <div>
+            <div class="movement-detail-eyebrow">
+                Movimentação #{{ movement.id }}
+            </div>
+
+            <h2 class="movement-detail-title mb-1">
+                {{ movement.product.name }}
+            </h2>
+
+            <p class="movement-detail-subtitle mb-0">
+                Detalhes da movimentação de estoque.
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+
+            <a href="{{ url_for(
+                    'movements.new_movement',
+                    product_id=movement.product_id,
+                    movement_type=movement.movement_type.value,
+                    quantity=movement.quantity,
+                    next=next_url
+                ) }}" class="btn btn-primary">
+                <i class="bi bi-arrow-repeat"></i>
+                Repetir movimentação
+            </a>
+
+            <a href="{{ next_url or url_for('movements.list_movements') }}" class="btn movement-back-button">
+                <i class="bi bi-arrow-left"></i>
+                Voltar
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Card principal -->
+    <div class="card movement-detail-card">
+
+        <div class="movement-detail-grid">
+
+            <!-- Produto -->
+            <div class="movement-detail-summary">
+
+                <div class="movement-detail-section-label">
+                    Produto
+                </div>
+
+                <h3 class="movement-detail-product-title">
+                    {{ movement.product.name }}
+                </h3>
+
+                <div class="movement-detail-code">
+                    {{ movement.product.code }}
+                </div>
+
+                <div class="mt-3">
+
+                    {% if movement.movement_type.name == "ENTRY" %}
+                    <span class="movement-type-badge movement-type-entry">
+                        <i class="bi bi-arrow-down-left"></i>
+                        Entrada
+                    </span>
+
+                    {% elif movement.movement_type.name == "EXIT" %}
+                    <span class="movement-type-badge movement-type-exit">
+                        <i class="bi bi-arrow-up-right"></i>
+                        Saída
+                    </span>
+
+                    {% else %}
+                    <span class="movement-type-badge movement-type-adjustment">
+                        <i class="bi bi-arrow-repeat"></i>
+                        Ajuste
+                    </span>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- Alteração -->
+            <div class="
+                movement-detail-stock
+                {% if movement.movement_type.name == 'ENTRY' %}
+                    movement-detail-stock-entry
+                {% elif movement.movement_type.name == 'EXIT' %}
+                    movement-detail-stock-exit
+                {% else %}
+                    movement-detail-stock-adjustment
+                {% endif %}">
+
+                <div class="movement-detail-section-label">
+                    Alteração no estoque
+                </div>
+
+                {% if movement.previous_quantity is not none %}
+
+                <div class="movement-detail-stock-values">
+
+                    <span>
+                        {{ movement.previous_quantity }}
+                    </span>
+
+                    <i class="bi bi-arrow-right"></i>
+
+                    <strong>
+                        {% if movement.movement_type.name == "ENTRY" %}
+                        {{ movement.previous_quantity + movement.quantity }}
+                        {% elif movement.movement_type.name == "EXIT" %}
+                        {{ movement.previous_quantity - movement.quantity }}
+                        {% else %}
+                        {{ movement.quantity }}
+                        {% endif %}
+                    </strong>
+
+                </div>
+
+                <div class="movement-detail-stock-delta">
+
+                    {% if movement.movement_type.name == "ENTRY" %}
+                    +{{ movement.quantity }} unidades
+
+                    {% elif movement.movement_type.name == "EXIT" %}
+                    -{{ movement.quantity }} unidades
+
+                    {% else %}
+                    Novo estoque: {{ movement.quantity }} unidades
+                    {% endif %}
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- Informações -->
+        <div class="movement-detail-info-grid">
+
+            <div class="movement-detail-info-card">
+                <div class="movement-detail-section-label">
+                    Data da movimentação
+                </div>
+
+                <strong>
+                    {{ movement.created_at | local_datetime}}
+                </strong>
+
+                <span>
+                    {{ movement.created_at | local_datetime }}
+                </span>
+            </div>
+
+
+            <div class="movement-detail-info-card">
+                <div class="movement-detail-section-label">
+                    Responsável
+                </div>
+
+                <strong>
+                    {% if movement.user %}
+                    {{ movement.user.username }}
+                    {% else %}
+                    Não identificado
+                    {% endif %}
+                </strong>
+            </div>
+
+
+            <div class="movement-detail-info-card movement-detail-reason-card">
+                <div class="movement-detail-section-label">
+                    Motivo
+                </div>
+
+                <strong>
+                    {{ movement.reason or "Não informado" }}
+                </strong>
+            </div>
+
+        </div>
+
+        <!-- Status de estorno -->
+        {% if movement.reversed_movement_id is not none %}
+
+        <div class="movement-detail-reversal">
+
+            <span class="movement-status-badge movement-status-reversal">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Estorno
+            </span>
+
+            <span class="movement-detail-reversal-text">
+                Estorno da movimentação #{{ movement.reversed_movement_id }}
+            </span>
+
+        </div>
+
+
+        {% elif movement.reverse %}
+
+        <div class="movement-detail-reversal">
+
+            <span class="movement-status-badge movement-status-reversed">
+                <i class="bi bi-check-circle"></i>
+                Estornada
+            </span>
+
+            <span class="movement-detail-reversal-text">
+                Estorno registrado como movimentação #{{ movement.reverse.id }}
+            </span>
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- Ação -->
+        {% if movement.reversed_movement_id is none and not movement.reverse %}
+
+        <div class="movement-detail-actions">
+
+            <form action="{{ url_for(
+                        'movements.reverse_movement',
+                        id=movement.id
+                    ) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Estornar movimentação
+                </button>
+
+            </form>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+{% endblock %}

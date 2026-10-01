@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}
+Usuários
+{% endblock %}
+
+{% block content %}
+
+<div class="users-header mb-4">
+
+    <div>
+        <h2 class="users-title mb-1">
+            Usuários
+        </h2>
+
+        <p class="users-subtitle mb-0">
+            Gerencie usuários, perfis de acesso e status das contas.
+        </p>
+    </div>
+
+    <a href="{{ url_for('users.new_user') }}" class="btn btn-primary users-new-button">
+        <i class="bi bi-person-plus"></i>
+        Novo usuário
+    </a>
+
+    <span class="users-count">
+        {{ users|length }} usuário{{ "" if users|length == 1 else "s" }}
+    </span>
+
+</div>
+
+
+<div class="users-table-card">
+
+    <div class="users-mobile-scroll-hint">
+        <i class="bi bi-arrow-left-right"></i>
+        Deslize para ver mais
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table table-hover mb-0 align-middle">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th>
+                        Usuário
+                    </th>
+
+                    <th>
+                        E-mail
+                    </th>
+
+                    <th>
+                        Perfil
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th class="text-end">
+                        Ações
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for user in users %}
+
+                <tr>
+
+                    <td>
+                        <strong>
+                            {{ user.username }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        {{ user.email }}
+                    </td>
+
+                    <td>
+
+                        {% if user.role.name == "ADMIN" %}
+
+                        <span class="user-role-badge user-role-admin">
+                            Administrador
+                        </span>
+
+                        {% elif user.role.name == "MANAGER" %}
+
+                        <span class="user-role-badge user-role-manager">
+                            Gerente
+                        </span>
+
+                        {% else %}
+
+                        <span class="user-role-badge user-role-user">
+                            Usuário
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if user.active %}
+
+                        <span class="user-status-badge user-status-active">
+                            Ativo
+                        </span>
+
+                        {% else %}
+
+                        <span class="user-status-badge user-status-inactive">
+                            Inativo
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td class="text-end">
+
+                        <div class="d-inline-flex align-items-center gap-1">
+
+                            <a href="{{ url_for('users.edit_user', id=user.id) }}" class="btn btn-sm user-edit-button">
+                                Editar
+                            </a>
+
+
+                            <div class="dropdown">
+
+                                <button type="button" class="btn btn-sm user-more-button" data-bs-toggle="dropdown"
+                                    aria-expanded="false" aria-label="Mais ações">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+
+
+                                <ul class="dropdown-menu dropdown-menu-end user-actions-menu">
+
+                                    <li>
+                                        <a href="{{ url_for('users.change_password', id=user.id) }}"
+                                            class="dropdown-item">
+                                            <i class="bi bi-key"></i>
+                                            Alterar senha
+                                        </a>
+                                    </li>
+
+
+                                    {% if user.id != current_user.id %}
+
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+
+                                    {% if user.active %}
+
+                                    <li>
+                                        <form action="{{ url_for('users.deactivate_user', id=user.id) }}" method="POST">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="dropdown-item user-action-danger">
+                                                <i class="bi bi-person-x"></i>
+                                                Desativar usuário
+                                            </button>
+                                        </form>
+                                    </li>
+
+                                    {% else %}
+
+                                    <li>
+                                        <form action="{{ url_for('users.activate_user', id=user.id) }}" method="POST">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="dropdown-item user-action-success">
+                                                <i class="bi bi-person-check"></i>
+                                                Ativar usuário
+                                            </button>
+                                        </form>
+                                    </li>
+
+                                    {% endif %}
+
+                                    {% endif %}
+
+                                </ul>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="5" class="text-center text-muted py-4">
+                        Nenhum usuário cadastrado.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

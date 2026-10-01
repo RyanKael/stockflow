@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}
+Página não encontrada
+{% endblock %}
+
+{% block content %}
+
+<div class="error-page">
+
+    <div class="error-card">
+
+        <div class="error-icon error-icon-primary">
+            <i class="bi bi-search"></i>
+        </div>
+
+        <div class="error-code">
+            404
+        </div>
+
+        <h1 class="error-title">
+            Página não encontrada
+        </h1>
+
+        <p class="error-description">
+            O endereço que você tentou acessar não existe,
+            foi alterado ou não está mais disponível.
+        </p>
+
+        <div class="error-actions">
+
+            <a
+                href="{{ url_for('main.dashboard') }}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-grid-1x2"></i>
+                Voltar ao Dashboard
+            </a>
+
+            <a
+                href="javascript:history.back()"
+                class="btn btn-outline-secondary"
+            >
+                <i class="bi bi-arrow-left"></i>
+                Voltar
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

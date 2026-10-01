@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}
+Movimentações
+{% endblock %}
+
+{% block content %}
+
+
+<div class="movements-header mb-4">
+
+    <div>
+        <h2 class="movements-title mb-1">
+            Movimentações
+        </h2>
+
+        <p class="movements-subtitle mb-0">
+            Histórico de entradas, saídas e ajustes de estoque.
+        </p>
+    </div>
+
+    <a href="{{ url_for('movements.new_movement') }}" class="btn btn-primary movements-new-button">
+        <i class="bi bi-plus-lg"></i>
+        Nova movimentação
+    </a>
+
+</div>
+
+
+<div class="card movements-table-card">
+
+    <div class="card-body">
+
+        {% if movements %}
+
+        <div class="movements-mobile-scroll-hint">
+            <i class="bi bi-arrow-left-right"></i>
+            Deslize para ver mais
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            <a href="{{ url_for(
+                                    'movements.list_movements',
+                                    sort='date',
+                                    direction='desc' if sort == 'date' and direction == 'asc' else 'asc'
+                                ) }}" class="movements-sort-link">
+                                Data
+
+                                {% if sort == "date" %}
+                                <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <th>Produto</th>
+
+                        <th>
+                            <a href="{{ url_for(
+                                    'movements.list_movements',
+                                    sort='type',
+                                    direction='desc' if sort == 'type' and direction == 'asc' else 'asc'
+                                ) }}" class="movements-sort-link">
+                                Tipo
+
+                                {% if sort == "type" %}
+                                <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <th>
+                            <a href="{{ url_for(
+                                    'movements.list_movements',
+                                    sort='quantity',
+                                    direction='desc' if sort == 'quantity' and direction == 'asc' else 'asc'
+                                ) }}" class="movements-sort-link">
+                                Movimentação
+
+                                {% if sort == "quantity" %}
+                                <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <th>Motivo</th>
+                        <th>Responsável</th>
+                        <th class="text-end">Ações</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for movement in movements %}
+
+                    <tr>
+
+                        <td>
+                            {{ movement.created_at | local_datetime }}
+                        </td>
+
+                        <td>
+                            {{ movement.product.name }}
+                        </td>
+
+                        <td>
+
+                            {% if movement.movement_type.name == "ENTRY" %}
+
+                            <span class="movement-type-badge movement-type-entry">
+                                <i class="bi bi-arrow-down-left"></i>
+                                Entrada
+                            </span>
+
+                            {% elif movement.movement_type.name == "EXIT" %}
+
+                            <span class="movement-type-badge movement-type-exit">
+                                <i class="bi bi-arrow-up-right"></i>
+                                Saída
+                            </span>
+
+                            {% else %}
+
+                            <span class="movement-type-badge movement-type-adjustment">
+                                <i class="bi bi-arrow-repeat"></i>
+                                Ajuste
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {% if movement.previous_quantity is not none %}
+
+                            <div class="movement-change-value">
+
+                                {% if movement.movement_type.name == "ENTRY" %}
+
+                                <span class="text-success">
+                                    +{{ movement.quantity }}
+                                </span>
+
+                                {% elif movement.movement_type.name == "EXIT" %}
+
+                                <span class="text-danger">
+                                    -{{ movement.quantity }}
+                                </span>
+
+                                {% else %}
+
+                                <span class="text-warning-emphasis">
+                                    {{ movement.previous_quantity }} → {{ movement.quantity }}
+                                </span>
+
+                                {% endif %}
+
+                            </div>
+
+                            <small class="movement-change-stock">
+                                {{ movement.previous_quantity }} →
+
+                                {% if movement.movement_type.name == "ENTRY" %}
+                                {{ movement.previous_quantity + movement.quantity }}
+
+                                {% elif movement.movement_type.name == "EXIT" %}
+                                {{ movement.previous_quantity - movement.quantity }}
+
+                                {% else %}
+                                {{ movement.quantity }}
+                                {% endif %}
+
+                            </small>
+
+                            {% else %}
+
+                            {{ movement.quantity }}
+
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ movement.reason or "-" }}
+                        </td>
+
+                        <td class="movement-user">
+                            {% if movement.user %}
+                            <span class="movement-user-name">
+                                <i class="bi bi-person"></i>
+                                {{ movement.user.username }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted">
+                                Não identificado
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+
+                            <a href="{{ url_for(
+                                    'movements.movement_detail',
+                                    id=movement.id,
+                                    next=request.full_path
+                                ) }}" class="btn btn-sm movement-details-button">
+                                Detalhes
+                            </a>
+
+                            {% if movement.reversed_movement_id is not none %}
+
+                            <span class="movement-status-badge movement-status-reversal">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                                Estorno
+                            </span>
+
+                            {% elif movement.reverse %}
+
+                            <span class="movement-status-badge movement-status-reversed">
+                                <i class="bi bi-check-circle"></i>
+                                Estornada
+                            </span>
+
+                            {% elif current_user.role.name in ["ADMIN", "MANAGER"] %}
+
+                            <form action="{{ url_for(
+                                    'movements.reverse_movement',
+                                    id=movement.id
+                                    ) }}" method="POST" class="d-inline"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token() }}"
+                                >
+
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    Estornar
+                                </button>
+
+                            </form>
+                            {% else %}
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% if pagination.pages > 1 %}
+
+        <div class="movements-pagination">
+
+            <div class="movements-pagination-info">
+                Mostrando
+                {{ pagination.first }}
+                –
+                {{ pagination.last }}
+                de
+                {{ pagination.total }}
+                registros
+            </div>
+
+            <nav aria-label="Paginação das movimentações">
+
+                <ul class="pagination pagination-sm mb-0">
+
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+
+                        <a class="page-link" href="{% if pagination.has_prev %}
+                                {{ url_for(
+                                    'movements.list_movements',
+                                    page=pagination.prev_num,
+                                    sort=sort,
+                                    direction=direction
+                                ) }}
+                            {% else %}
+                                #
+                            {% endif %}">
+                            Anterior
+                        </a>
+
+                    </li>
+
+                    {% for page_num in pagination.iter_pages(
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=2,
+                    right_current=2
+                    ) %}
+
+                    {% if page_num %}
+
+                    <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+
+                        <a class="page-link" href="{{ url_for(
+                                'movements.list_movements',
+                                page=page_num,
+                                sort=sort,
+                                direction=direction
+                            ) }}">
+                            {{ page_num }}
+                        </a>
+
+                    </li>
+
+                    {% else %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+
+                    {% endif %}
+
+                    {% endfor %}
+
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+
+                        <a class="page-link" href="{% if pagination.has_next %}
+                                {{ url_for(
+                                    'movements.list_movements',
+                                    page=pagination.next_num,
+                                    sort=sort,
+                                    direction=direction
+                                ) }}
+                            {% else %}
+                                #
+                            {% endif %}">
+                            Próxima
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </nav>
+
+        </div>
+
+        {% endif %}
+
+
+        {% else %}
+
+        <div class="alert alert-info mb-0">
+
+            Nenhuma movimentação registrada.
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

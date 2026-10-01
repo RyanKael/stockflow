@@ -1,0 +1,501 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nova Movimentação
+{% endblock %}
+
+{% block content %}
+
+{% if error %}
+
+<div class="movement-error-alert alert-dismissible fade show" role="alert">
+
+    <div class="movement-error-title">
+        <i class="bi bi-exclamation-triangle"></i>
+        Estoque insuficiente
+    </div>
+
+    <p class="mb-1">
+        A quantidade solicitada é maior que o estoque disponível.
+    </p>
+
+    <p class="mb-0">
+        <strong>Estoque disponível:</strong>
+        {{ available_quantity }} unidades.
+    </p>
+
+    <button type="button" class="btn-close" data-bs-dismiss="alert">
+    </button>
+
+
+</div>
+
+{% endif %}
+
+<div class="movement-page-header mb-4">
+
+    <div>
+        <h2 class="movement-page-title mb-1">
+            Nova movimentação
+        </h2>
+
+        <p class="movement-page-subtitle mb-0">
+            Registre uma entrada, saída ou ajuste de estoque.
+        </p>
+    </div>
+
+</div>
+
+<div class="card shadow-sm movement-form-card">
+
+
+    <div class="card-body">
+
+        <form method="POST">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <input
+                type="hidden"
+                name="next"
+                value="{{ next_url or '' }}"
+            >
+
+            <!-- Produto -->
+
+            <div class="mb-4">
+
+                <label for="product_id" class="form-label fw-semibold">
+
+                    Produto
+
+                </label>
+
+                <select name="product_id" id="product_id" class="form-select" required>
+
+                    <option value="">
+                        Selecione um produto
+                    </option>
+
+                    {% for product in products %}
+
+                    <option value="{{ product.id }}" data-stock="{{ product.quantity }}" {% if
+                        selected_product_id|int==product.id %} selected {% endif %}>
+
+                        {{ product.name }} — {{ product.code }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Estoque atual -->
+
+            <div id="stock-info" class="alert alert-secondary d-none py-2 mb-3">
+                <div class="movement-info-icon movement-info-stock">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+
+                <div>
+
+                    <span class="movement-info-label">
+                        Estoque atual:
+                    </span>
+
+                    <strong id="current-stock" class="movement-info-value">
+                        0 unidades
+                    </strong>
+
+                </div>
+            </div>
+
+
+            <!-- Tipo -->
+
+            <div class="mb-4">
+
+                <label for="movement_type" class="form-label fw-semibold">
+
+                    Tipo
+
+                </label>
+
+                <select name="movement_type" id="movement_type" class="form-select" required>
+
+                    <option value="">
+                        Selecione o tipo
+                    </option>
+
+                    <option value="Entrada" {% if selected_movement_type=="Entrada" %} selected {% endif %}>
+                        Entrada
+                    </option>
+
+                    <option value="Saída" {% if selected_movement_type=="Saída" %} selected {% endif %}>
+                        Saída
+                    </option>
+
+                    {% if current_user.role.name in ["ADMIN", "MANAGER"] %}
+                    <option value="Ajuste" {% if selected_movement_type=="Ajuste" %} selected {% endif %}>
+                        Ajuste
+                    </option>
+                    {% endif %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Informação da operação -->
+
+            <div id="operation-info" class="movement-operation-info d-none mb-3">
+
+                <div id="operation-icon" class="movement-operation-icon"></div>
+
+
+                <div>
+                    <strong id="operation-title" class="movement-operation-title"></strong>
+
+                    <div id="operation-description" class="movement-operation-description"></div>
+                </div>
+
+            </div>
+
+
+            <!-- Quantidade -->
+
+            <div class="mb-4">
+
+                <label for="quantity" class="form-label fw-semibold">
+
+                    Quantidade
+
+                </label>
+
+                <input type="number" name="quantity" id="quantity" class="form-control" min="0"
+                    value="{{ quantity_value or '' }}" required>
+
+                <div id="quantity-help" class="form-text">
+
+                    Informe a quantidade da movimentação.
+
+                </div>
+
+            </div>
+
+
+            <!-- Resultado -->
+
+            <div id="result-info" class="movement-result-info d-none mb-3">
+
+                <span class="movement-info-label">
+                    Estoque após a operação:
+                </span>
+
+                <strong id="result-stock" class="movement-info-value">
+                    0 unidades
+                </strong>
+
+            </div>
+
+            <!-- Motivo -->
+
+            <div class="mb-4">
+
+                <label for="reason" class="form-label">
+                    Motivo
+                </label>
+
+                <textarea name="reason" id="reason" class="form-control" rows="3" maxlength="250"
+                    placeholder="Informe o motivo da movimentação">{{ reason_value or '' }}</textarea>
+
+                <div class="d-flex justify-content-end mt-1">
+                    <small id="reason-counter" class="movement-reason-counter">
+
+                        {{ (reason_value or '')|length }}/250
+
+                    </small>
+                </div>
+
+            </div>
+
+
+            <!-- Botões -->
+
+            <div class="movement-form-actions">
+
+                <button type="submit" id="submit-button" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i>
+                    Salvar movimentação
+
+                </button>
+
+                <a href="{{ url_for('movements.list_movements') }}" class="btn btn-secondary">
+
+                    Cancelar
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+</div>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const productSelect = document.getElementById("product_id");
+        const movementType = document.getElementById("movement_type");
+        const quantityInput = document.getElementById("quantity");
+
+        const stockInfo = document.getElementById("stock-info");
+        const currentStock = document.getElementById("current-stock");
+
+        const operationInfo = document.getElementById("operation-info");
+        const operationIcon = document.getElementById("operation-icon");
+        const operationTitle = document.getElementById("operation-title");
+        const operationDescription =
+            document.getElementById("operation-description");
+
+        const resultInfo = document.getElementById("result-info");
+        const resultStock = document.getElementById("result-stock");
+
+        const quantityHelp = document.getElementById("quantity-help");
+        const submitButton = document.getElementById("submit-button");
+
+
+        let selectedStock = null;
+
+
+        function updateProduct() {
+
+            const selectedOption =
+                productSelect.options[productSelect.selectedIndex];
+
+
+            if (!productSelect.value) {
+
+                selectedStock = null;
+
+                stockInfo.classList.add("d-none");
+                resultInfo.classList.add("d-none");
+
+                return;
+
+            }
+
+
+            selectedStock =
+                parseInt(selectedOption.dataset.stock || "0");
+
+
+            currentStock.textContent =
+                `${selectedStock} unidade${selectedStock !== 1 ? "s" : ""}`;
+
+
+            stockInfo.classList.remove("d-none");
+
+
+            updateOperation();
+
+        }
+
+
+        function updateOperation() {
+
+            const type = movementType.value;
+            const quantity =
+                parseInt(quantityInput.value || "0");
+
+
+            operationInfo.classList.add("d-none");
+            resultInfo.classList.add("d-none");
+
+            quantityInput.classList.remove("is-invalid");
+            submitButton.disabled = false;
+
+
+            if (!type) {
+
+                quantityHelp.textContent =
+                    "Informe a quantidade da movimentação.";
+
+                return;
+
+            }
+
+
+            operationInfo.classList.remove("d-none");
+
+
+            if (type === "Entrada") {
+
+                operationInfo.className =
+                    "movement-operation-info movement-operation-entry mb-3";
+
+                operationIcon.innerHTML = '<i class="bi bi-arrow-down-left"></i>';
+
+                operationTitle.textContent =
+                    "Entrada de estoque";
+
+                operationDescription.textContent =
+                    "A quantidade informada será adicionada ao estoque atual.";
+
+                quantityHelp.textContent =
+                    "Informe quantas unidades estão entrando no estoque.";
+
+                if (selectedStock !== null) {
+
+                    const finalStock =
+                        selectedStock + quantity;
+
+                    showResult(finalStock);
+
+                }
+
+            }
+
+
+            else if (type === "Saída") {
+
+                operationInfo.className =
+                    "movement-operation-info movement-operation-exit mb-3";
+
+                operationIcon.innerHTML = '<i class="bi bi-arrow-up-right"></i>';
+
+                operationTitle.textContent =
+                    "Saída de estoque";
+
+                operationDescription.textContent =
+                    "A quantidade informada será retirada do estoque atual.";
+
+                quantityHelp.textContent =
+                    "A quantidade não pode ser maior que o estoque disponível.";
+
+
+                if (selectedStock !== null) {
+
+                    const finalStock =
+                        selectedStock - quantity;
+
+
+                    if (quantity > selectedStock) {
+
+                        quantityInput.classList.add("is-invalid");
+
+                        submitButton.disabled = true;
+
+                        resultInfo.className =
+                            "movement-result-info movement-result-danger mb-3";
+
+                        resultInfo.classList.remove("d-none");
+
+                        resultStock.innerHTML =
+                            '<i class="bi bi-exclamation-triangle me-1"></i> Estoque insuficiente';
+
+                    }
+
+                    else {
+
+                        showResult(finalStock);
+
+                    }
+
+                }
+
+            }
+
+
+            else if (type === "Ajuste") {
+
+                operationInfo.className =
+                    "movement-operation-info movement-operation-adjustment mb-3";
+
+                operationIcon.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
+
+                operationTitle.textContent =
+                    "Ajuste de estoque";
+
+                operationDescription.textContent =
+                    "A quantidade informada será definida como o novo estoque.";
+
+                quantityHelp.textContent =
+                    "Informe a quantidade real encontrada no estoque.";
+
+
+                showResult(quantity);
+
+            }
+
+        }
+
+
+        function showResult(value) {
+
+            resultInfo.className =
+                "movement-result-info mb-3";
+
+            resultInfo.classList.remove("d-none");
+
+            resultStock.textContent =
+                `${value} unidade${value !== 1 ? "s" : ""}`;
+
+        }
+
+
+        productSelect.addEventListener(
+            "change",
+            updateProduct
+        );
+
+
+        movementType.addEventListener(
+            "change",
+            updateOperation
+        );
+
+
+        quantityInput.addEventListener(
+            "input",
+            updateOperation
+        );
+
+
+        updateProduct();
+
+    });
+
+</script>
+
+<script>
+
+    const reasonInput = document.getElementById("reason");
+    const reasonCounter = document.getElementById("reason-counter");
+
+    function updateReasonCounter() {
+
+        const currentLength = reasonInput.value.length;
+
+        reasonCounter.textContent = `${currentLength}/250`;
+
+    }
+
+    reasonInput.addEventListener("input", updateReasonCounter);
+
+    updateReasonCounter();
+
+</script>
+
+{% endblock %}

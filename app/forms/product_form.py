@@ -6,6 +6,7 @@ from wtforms import (
     TextAreaField,
     BooleanField,
     SubmitField,
+    SelectField,
 )
 
 from wtforms.validators import (
@@ -50,7 +51,7 @@ class ProductForm(FlaskForm):
         default=0,
         validators=[
             NumberRange(min=0),
-        ],
+        ]
     )
 
     location = StringField(
@@ -67,4 +68,10 @@ class ProductForm(FlaskForm):
 
     submit = SubmitField(
         "Salvar"
+    )
+
+    category_id = SelectField(
+        "Categoria",
+        coerce=int,
+        validators=[],
     )

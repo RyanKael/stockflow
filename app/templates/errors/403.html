@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}
+Acesso negado
+{% endblock %}
+
+{% block content %}
+
+<div class="error-page">
+
+    <div class="error-card">
+
+        <div class="error-icon error-icon-warning">
+            <i class="bi bi-shield-lock"></i>
+        </div>
+
+        <div class="error-code">
+            403
+        </div>
+
+        <h1 class="error-title">
+            Acesso negado
+        </h1>
+
+        <p class="error-description">
+            Você não possui permissão para acessar esta área do sistema.
+        </p>
+
+        <div class="error-actions">
+
+            <a
+                href="{{ url_for('main.dashboard') }}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-grid-1x2"></i>
+                Voltar ao Dashboard
+            </a>
+
+            <a
+                href="javascript:history.back()"
+                class="btn btn-outline-secondary"
+            >
+                <i class="bi bi-arrow-left"></i>
+                Voltar
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

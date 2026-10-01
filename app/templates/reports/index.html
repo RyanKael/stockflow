@@ -1,0 +1,565 @@
+{% extends "base.html" %}
+
+{% block title %}
+Relatórios
+{% endblock %}
+
+{% block content %}
+
+<div class="reports-page">
+
+    <!-- Cabeçalho -->
+    <div class="reports-header mb-4">
+        <div>
+            <h2 class="reports-title mb-1">
+                Relatórios
+            </h2>
+
+            <p class="reports-subtitle mb-0">
+                Consulte, filtre e exporte informações das movimentações do estoque.
+            </p>
+        </div>
+    </div>
+
+
+    <!-- Indicadores -->
+    <div class="row g-3 mb-4">
+
+        <!-- Movimentações -->
+        <div class="col-6 col-xl-3">
+            <div class="report-summary-card report-summary-primary">
+
+                <div>
+                    <div class="report-summary-label">
+                        Movimentações
+                    </div>
+
+                    <div class="report-summary-value">
+                        {{ total_movements }}
+                    </div>
+                </div>
+
+                <div class="report-summary-icon">
+                    <i class="bi bi-arrow-left-right"></i>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Entradas -->
+        <div class="col-6 col-xl-3">
+            <div class="report-summary-card report-summary-success">
+
+                <div>
+                    <div class="report-summary-label">
+                        Entradas
+                    </div>
+
+                    <div class="report-summary-value">
+                        {{ total_entries }}
+                    </div>
+                </div>
+
+                <div class="report-summary-icon">
+                    <i class="bi bi-arrow-down-left"></i>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Saídas -->
+        <div class="col-6 col-xl-3">
+            <div class="report-summary-card report-summary-danger">
+
+                <div>
+                    <div class="report-summary-label">
+                        Saídas
+                    </div>
+
+                    <div class="report-summary-value">
+                        {{ total_exits }}
+                    </div>
+                </div>
+
+                <div class="report-summary-icon">
+                    <i class="bi bi-arrow-up-right"></i>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Ajustes -->
+        <div class="col-6 col-xl-3">
+            <div class="report-summary-card report-summary-warning">
+
+                <div>
+                    <div class="report-summary-label">
+                        Ajustes
+                    </div>
+
+                    <div class="report-summary-value">
+                        {{ total_adjustments }}
+                    </div>
+                </div>
+
+                <div class="report-summary-icon">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Filtros -->
+    <div class="reports-filter-card mb-4">
+
+        <div class="reports-filter-header">
+            <div>
+                <h3>Filtros</h3>
+
+                <p>
+                    Refine as movimentações exibidas no relatório.
+                </p>
+            </div>
+        </div>
+
+
+        <form method="GET">
+
+            <div class="row g-3">
+
+                <div class="col-md-3">
+                    <label class="form-label">
+                        Data inicial
+                    </label>
+
+                    <input type="date" name="start_date" class="form-control" value="{{ start_date_filter }}">
+                    <input type="hidden" name="sort" value="{{ sort }}">
+                    <input type="hidden" name="direction" value="{{ direction }}">
+                </div>
+
+
+                <div class="col-md-3">
+                    <label class="form-label">
+                        Data final
+                    </label>
+
+                    <input type="date" name="end_date" class="form-control" value="{{ end_date_filter }}">
+                </div>
+
+
+                <div class="col-md-3">
+                    <label class="form-label">
+                        Produto
+                    </label>
+
+                    <select name="product_id" class="form-select">
+
+                        <option value="" {% if not product_id_filter %}selected{% endif %}>
+                            Todos
+                        </option>
+
+                        {% for product in products %}
+
+                        <option value="{{ product.id }}" {% if product_id_filter==product.id|string %} selected {% endif
+                            %}>
+                            {{ product.name }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+
+                <div class="col-md-3">
+                    <label class="form-label">
+                        Tipo de movimentação
+                    </label>
+
+                    <select name="movement_type" class="form-select">
+
+                        <option value="" {% if not movement_type_filter %}selected{% endif %}>
+                            Todos
+                        </option>
+
+                        <option value="Entrada" {% if movement_type_filter=="Entrada" %}selected{% endif %}>
+                            Entrada
+                        </option>
+
+                        <option value="Saída" {% if movement_type_filter=="Saída" %}selected{% endif %}>
+                            Saída
+                        </option>
+
+                        <option value="Ajuste" {% if movement_type_filter=="Ajuste" %}selected{% endif %}>
+                            Ajuste
+                        </option>
+
+                    </select>
+                </div>
+
+            </div>
+
+
+            <div class="reports-actions">
+
+                <div class="reports-filter-actions">
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel"></i>
+                        Filtrar
+                    </button>
+
+                    <a href="{{ url_for('reports.index') }}" class="btn btn-outline-secondary">
+                        Limpar
+                    </a>
+
+                </div>
+
+
+                <div class="reports-export-actions">
+
+
+                    <a href="{{ url_for(
+                            'reports.export_pdf',
+                            movement_type=movement_type_filter,
+                            product_id=product_id_filter,
+                            start_date=start_date_filter,
+                            end_date=end_date_filter
+                        ) }}" class="btn btn-outline-danger">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                        Gerar PDF
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- Tabela -->
+    <div class="reports-table-card">
+
+        <div class="reports-table-header">
+
+            <div>
+                <h3>Movimentações registradas</h3>
+
+                <p>
+                    Resultados encontrados de acordo com os filtros selecionados.
+                </p>
+            </div>
+
+            <span class="reports-result-count">
+                {{ total_movements }} registro{{ "" if total_movements == 1 else "s" }}
+            </span>
+
+        </div>
+
+
+        {% if movements %}
+
+        <div class="reports-mobile-scroll-hint">
+            <i class="bi bi-arrow-left-right"></i>
+            Deslize para ver mais
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>
+                            <a href="{{ url_for(
+                                    'reports.index',
+                                    sort='product',
+                                    direction='desc' if sort == 'product' and direction == 'asc' else 'asc',
+                                    movement_type=movement_type_filter,
+                                    product_id=product_id_filter,
+                                    start_date=start_date_filter,
+                                    end_date=end_date_filter
+                                ) }}" class="reports-sort-link">
+                                Produto
+
+                                {% if sort == "product" %}
+                                <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ url_for(
+                                    'reports.index',
+                                    sort='type',
+                                    direction='desc' if sort == 'type' and direction == 'asc' else 'asc',
+                                    movement_type=movement_type_filter,
+                                    product_id=product_id_filter,
+                                    start_date=start_date_filter,
+                                    end_date=end_date_filter
+                                ) }}" class="reports-sort-link">
+                                Tipo
+
+                                {% if sort == "type" %}
+                                <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ url_for(
+                                    'reports.index',
+                                    sort='quantity',
+                                    direction='desc' if sort == 'quantity' and direction == 'asc' else 'asc',
+                                    movement_type=movement_type_filter,
+                                    product_id=product_id_filter,
+                                    start_date=start_date_filter,
+                                    end_date=end_date_filter
+                                ) }}" class="reports-sort-link">
+                                Quantidade
+
+                                {% if sort == "quantity" %}
+                                <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>Usuário</th>
+                        <th>
+                            <a href="{{ url_for(
+                                    'reports.index',
+                                    sort='date',
+                                    direction='desc' if sort == 'date' and direction == 'asc' else 'asc',
+                                    movement_type=movement_type_filter,
+                                    product_id=product_id_filter,
+                                    start_date=start_date_filter,
+                                    end_date=end_date_filter
+                                ) }}" class="reports-sort-link">
+                                Data
+
+                                {% if sort == "date" %}
+                                <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for movement in movements %}
+
+                    <tr>
+
+                        <td class="reports-movement-id">
+                            #{{ movement.id }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ movement.product.name }}
+                            </strong>
+                        </td>
+
+                        <td>
+
+                            {% if movement.movement_type.name == "ENTRY" %}
+
+                            <span class="movement-type-badge movement-type-entry">
+                                <i class="bi bi-arrow-down-left"></i>
+                                Entrada
+                            </span>
+
+                            {% elif movement.movement_type.name == "EXIT" %}
+
+                            <span class="movement-type-badge movement-type-exit">
+                                <i class="bi bi-arrow-up-right"></i>
+                                Saída
+                            </span>
+
+                            {% else %}
+
+                            <span class="movement-type-badge movement-type-adjustment">
+                                <i class="bi bi-arrow-repeat"></i>
+                                Ajuste
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {% if movement.movement_type.name == "ENTRY" %}
+
+                            <strong class="reports-quantity-entry">
+                                +{{ movement.quantity }}
+                            </strong>
+
+                            {% elif movement.movement_type.name == "EXIT" %}
+
+                            <strong class="reports-quantity-exit">
+                                -{{ movement.quantity }}
+                            </strong>
+
+                            {% else %}
+
+                            <strong class="reports-quantity-adjustment">
+                                {{ movement.quantity }}
+                            </strong>
+
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ movement.user.username if movement.user else "Não identificado" }}
+                        </td>
+
+                        <td>
+                            {{ movement.created_at | local_datetime }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% if pagination.pages > 1 %}
+
+        <div class="reports-pagination">
+
+            <div class="reports-pagination-info">
+                Mostrando
+                {{ pagination.first }}
+                –
+                {{ pagination.last }}
+                de
+                {{ pagination.total }}
+                registros
+            </div>
+
+            <nav aria-label="Paginação dos relatórios">
+
+                <ul class="pagination pagination-sm mb-0">
+
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+
+                        <a class="page-link" href="{% if pagination.has_prev %}
+                                {{ url_for(
+                                    'reports.index',
+                                    page=pagination.prev_num,
+                                    movement_type=movement_type_filter,
+                                    product_id=product_id_filter,
+                                    start_date=start_date_filter,
+                                    end_date=end_date_filter,
+                                    sort=sort,
+                                    direction=direction
+                                ) }}
+                            {% else %}
+                                #
+                            {% endif %}">
+                            Anterior
+                        </a>
+
+                    </li>
+
+
+                    {% for page_num in pagination.iter_pages(
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=2,
+                    right_current=2
+                    ) %}
+
+                    {% if page_num %}
+
+                    <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+
+                        <a class="page-link" href="{{ url_for(
+                                'reports.index',
+                                page=page_num,
+                                movement_type=movement_type_filter,
+                                product_id=product_id_filter,
+                                start_date=start_date_filter,
+                                end_date=end_date_filter,
+                                sort=sort,
+                                direction=direction
+                            ) }}">
+                            {{ page_num }}
+                        </a>
+
+                    </li>
+
+                    {% else %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+
+                    {% endif %}
+
+                    {% endfor %}
+
+
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+
+                        <a class="page-link" href="{% if pagination.has_next %}
+                                {{ url_for(
+                                    'reports.index',
+                                    page=pagination.next_num,
+                                    movement_type=movement_type_filter,
+                                    product_id=product_id_filter,
+                                    start_date=start_date_filter,
+                                    end_date=end_date_filter,
+                                    sort=sort,
+                                    direction=direction
+                                ) }}
+                            {% else %}
+                                #
+                            {% endif %}">
+                            Próxima
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </nav>
+
+        </div>
+
+        {% endif %}
+
+        {% else %}
+
+        <div class="reports-empty-state">
+
+            <i class="bi bi-search"></i>
+
+            <strong>
+                Nenhuma movimentação encontrada
+            </strong>
+
+            <span>
+                Tente ajustar os filtros utilizados.
+            </span>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

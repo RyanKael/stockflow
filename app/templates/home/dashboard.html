@@ -1,0 +1,496 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header mb-4">
+
+    <div>
+        <h2 class="dashboard-title mb-1">
+            Visão geral do estoque
+        </h2>
+
+        <p class="dashboard-subtitle mb-0">
+            Acompanhe produtos, movimentações e alertas do seu estoque.
+        </p>
+    </div>
+
+    <div>
+
+        <a href="{{ url_for('movements.new_movement') }}" class="btn btn-primary btn-nova-movimentacao">
+            <i class="bi bi-plus-lg"></i>
+
+            Nova movimentação
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- Indicadores -->
+
+<div class="row g-3 mb-4">
+
+    <!-- Produtos ativos -->
+
+    <div class="col-6 col-md-6 col-xl-3">
+
+        <div class="card shadow-sm h-100 dashboard-stat-card dashboard-stat-primary">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div>
+
+                        <div class="stat-label text-muted">
+                            Produtos ativos
+                        </div>
+
+                        <div class="stat-value">
+                            {{ active_products }}
+                        </div>
+
+                    </div>
+
+                    <div class="dashboard-stat-icon dashboard-stat-icon-primary">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Estoque total -->
+
+    <div class="col-6 col-md-6 col-xl-3">
+
+        <div class="card shadow-sm h-100 dashboard-stat-card dashboard-stat-stock">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div>
+
+                        <div class="stat-label text-muted">
+                            Estoque total
+                        </div>
+
+                        <div class="stat-value">
+                            {{ total_stock }}
+                        </div>
+
+                    </div>
+
+                    <div class="dashboard-stat-icon dashboard-stat-icon-blue">
+                        <i class="bi bi-boxes"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Estoque baixo -->
+
+    <div class="col-6 col-md-6 col-xl-3">
+
+        <a href="{{ url_for('products.list_products', stock='low') }}"
+            class="text-decoration-none text-reset dashboard-card-link">
+
+            <div class="
+                card
+                shadow-sm
+                h-100
+                dashboard-stat-card
+                {% if low_stock_products > 0 %}
+                    dashboard-stat-warning
+                {% else %}
+                    dashboard-stat-neutral
+                {% endif %}">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="stat-label text-muted">
+                                Estoque baixo
+                            </div>
+
+                            <div class="stat-value">
+                                {{ low_stock_products }}
+                            </div>
+
+                        </div>
+
+                        <div class="
+                        dashboard-stat-icon
+                        {% if low_stock_products > 0 %}
+                            dashboard-stat-icon-warning
+                        {% else %}
+                            dashboard-stat-icon-neutral
+                        {% endif %}">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- Sem estoque -->
+
+    <div class="col-6 col-md-6 col-xl-3">
+
+        <a href="{{ url_for('products.list_products', stock='out') }}"
+            class="text-decoration-none text-reset dashboard-card-link">
+
+            <div class="
+            card
+            shadow-sm
+            h-100
+            dashboard-stat-card
+            {% if out_of_stock_products > 0 %}
+                dashboard-stat-danger
+            {% else %}
+                dashboard-stat-neutral
+            {% endif %}">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="stat-label text-muted">
+                                Sem estoque
+                            </div>
+
+                            <div class="stat-value">
+                                {{ out_of_stock_products }}
+                            </div>
+
+                        </div>
+
+                        <div class="
+                        dashboard-stat-icon
+                        {% if out_of_stock_products > 0 %}
+                            dashboard-stat-icon-danger
+                        {% else %}
+                            dashboard-stat-icon-neutral
+                        {% endif %}">
+                            <i class="bi bi-x-circle"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+    <!-- Movimentações de hoje -->
+
+    <div class="dashboard-today-section mb-4">
+
+        <div class="dashboard-section-title">
+            <span>Movimentações de hoje</span>
+            <small>Resumo das movimentações realizadas hoje</small>
+        </div>
+
+        <div class="dashboard-today-list">
+
+            <!-- Entradas -->
+
+            <div class="col-6 col-md-4">
+
+                <div class="dashboard-today-card dashboard-today-entry">
+
+                    <div class="dashboard-today-icon">
+                        <i class="bi bi-arrow-down-left"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="dashboard-today-label">
+                            Entradas
+                        </div>
+
+                        <div class="dashboard-today-value">
+                            {{ entries_today }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Saídas -->
+
+            <div class="col-6 col-md-4">
+
+                <div class="dashboard-today-card dashboard-today-exit">
+
+                    <div class="dashboard-today-icon">
+                        <i class="bi bi-arrow-up-right"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="dashboard-today-label">
+                            Saídas
+                        </div>
+
+                        <div class="dashboard-today-value">
+                            {{ exits_today }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Últimas movimentações -->
+
+    <div class="card shadow-sm dashboard-movements-card">
+
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <div>
+
+                    <h5 class="mb-1">
+                        Últimas movimentações
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Movimentações mais recentes do estoque.
+                    </p>
+
+                </div>
+
+                <a href="{{ url_for('movements.list_movements') }}" class="btn btn-sm btn-outline-primary">
+
+                    Ver todas
+
+                </a>
+
+            </div>
+
+
+            {% if recent_movements %}
+
+            <div class="dashboard-mobile-scroll-hint">
+                <i class="bi bi-arrow-left-right"></i>
+                Deslize para ver mais
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Data</th>
+                            <th>Produto</th>
+                            <th>Tipo</th>
+                            <th class="text-end">Quantidade</th>
+                            <th>Motivo</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for movement in recent_movements %}
+
+                        <tr>
+
+                            <!-- Data -->
+
+                            <td>
+
+                                <div class="movement-date">
+
+                                    {{ movement.created_at | local_datetime}}
+
+                                </div>
+
+                                <small class="text-muted">
+
+                                    {{ movement.created_at | local_datetime }}
+
+                                </small>
+
+                            </td>
+
+
+                            <!-- Produto -->
+
+                            <td>
+
+                                <strong>
+                                    {{ movement.product.name }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- Tipo -->
+
+                            <td>
+
+                                {% if movement.movement_type.name == "ENTRY" %}
+
+                                <span class="movement-badge movement-entry-badge">
+
+                                    <span class="movement-icon">
+                                        ↓
+                                    </span>
+
+                                    Entrada
+
+                                </span>
+
+                                {% elif movement.movement_type.name == "EXIT" %}
+
+                                <span class="movement-badge movement-exit-badge">
+
+                                    <span class="movement-icon">
+                                        ↑
+                                    </span>
+
+                                    Saída
+
+                                </span>
+
+                                {% else %}
+
+                                <span class="movement-badge movement-adjustment-badge">
+
+                                    <span class="movement-icon">
+                                        ↻
+                                    </span>
+
+                                    Ajuste
+
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Quantidade -->
+
+                            <td class="text-end">
+
+                                {% if movement.movement_type.name == "ENTRY" %}
+
+                                <strong class="text-success">
+                                    +{{ movement.quantity }}
+                                </strong>
+
+                                {% elif movement.movement_type.name == "EXIT" %}
+
+                                <strong class="text-danger">
+                                    -{{ movement.quantity }}
+                                </strong>
+
+                                {% else %}
+
+                                <strong class="text-warning-emphasis">
+                                    {{ movement.quantity }}
+                                </strong>
+
+                                {% endif %}
+
+                                <small class="text-muted">
+                                    un.
+                                </small>
+
+                            </td>
+
+
+                            <!-- Motivo -->
+
+                            <td>
+
+                                {% if movement.reason %}
+
+                                <span class="text-muted">
+                                    {{ movement.reason }}
+                                </span>
+
+                                {% else %}
+
+                                <span class="text-muted">
+                                    —
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="alert alert-secondary mb-0">
+
+                Nenhuma movimentação registrada.
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    {% endblock %}

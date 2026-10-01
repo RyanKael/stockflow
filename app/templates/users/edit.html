@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar usuário
+{% endblock %}
+
+{% block content %}
+
+<div class="users-form-header mb-4">
+
+    <div>
+        <h2 class="users-form-title mb-1">
+            Editar usuário
+        </h2>
+
+        <p class="users-form-subtitle mb-0">
+            Atualize os dados e o perfil de acesso do usuário.
+        </p>
+    </div>
+
+    <a href="{{ url_for('users.list_users') }}" class="btn btn-outline-secondary users-form-back">
+        <i class="bi bi-arrow-left"></i>
+        Voltar
+    </a>
+
+</div>
+
+
+<div class="card shadow-sm users-form-card">
+
+    <div class="card-body">
+
+        <form method="POST" action="{{ url_for('users.edit_user', id=user.id) }}">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Nome de usuário
+                    </label>
+
+                    <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        E-mail
+                    </label>
+
+                    <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Perfil
+                    </label>
+
+                    <select name="role" class="form-select" required>
+
+                        <option value="Administrador" {% if user.role==UserRole.ADMIN %} selected {% endif %}>
+                            Administrador
+                        </option>
+
+                        <option value="Gerente" {% if user.role==UserRole.MANAGER %} selected {% endif %}>
+                            Gerente
+                        </option>
+
+                        <option value="Usuário" {% if user.role==UserRole.USER %} selected {% endif %}>
+                            Usuário
+                        </option>
+
+                    </select>
+
+                    <div class="form-text">
+                        Define o nível de acesso do usuário no sistema.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="users-form-actions">
+
+                <a href="{{ url_for('users.list_users') }}" class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i>
+                    Salvar Alterações
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

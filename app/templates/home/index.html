@@ -6,24 +6,193 @@ Home
 
 {% block content %}
 
-<div class="text-center py-5">
+<div class="home-page">
 
-    <h1 class="display-4">
-        StockFlow
-    </h1>
+    <!-- Hero / apresentação -->
+    <div class="home-hero-card">
 
-    <p class="lead">
-        Sistema de gerenciamento de estoque
-    </p>
+        <div class="home-hero-content">
 
-    <hr>
+            <div class="home-hero-badge">
+                Início
+            </div>
 
-    <a href="#"
-       class="btn btn-primary btn-lg">
+            <h1 class="home-hero-title">
+                StockFlow
+            </h1>
 
-        Produtos
+            <p class="home-hero-subtitle">
+                Controle produtos, acompanhe movimentações e mantenha
+                o estoque organizado de forma simples e eficiente.
+            </p>
 
-    </a>
+            <div class="home-hero-actions">
+
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-sm home-hero-button">
+                    <i class="bi bi-grid"></i>
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('products.list_products') }}"
+                    class="btn btn-outline-primary btn-sm home-hero-button">
+                    <i class="bi bi-box-seam"></i>
+                    Produtos
+                </a>
+
+                <a href="{{ url_for('movements.list_movements') }}"
+                    class="btn btn-outline-primary btn-sm home-hero-button">
+                    <i class="bi bi-arrow-left-right"></i>
+                    Movimentações
+                </a>
+
+                <a href="{{ url_for('reports.index') }}" class="btn btn-outline-primary btn-sm home-hero-button">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    Relatórios
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Atalhos rápidos -->
+    <div class="home-section">
+
+        <div class="home-section-header">
+            <h2 class="home-section-title">
+                Acesso rápido
+            </h2>
+
+            <p class="home-section-subtitle">
+                Escolha a ação que deseja realizar.
+            </p>
+        </div>
+
+        <div class="row g-3">
+
+            <div class="col-md-6 col-xl-3">
+                <a href="{{ url_for('main.dashboard') }}" class="home-action-card text-decoration-none">
+                    <div class="home-action-icon home-action-icon-primary">
+                        <i class="bi bi-bar-chart-line"></i>
+                    </div>
+
+                    <div class="home-action-body">
+                        <h3>Ver dashboard</h3>
+                        <p>
+                            Acompanhe indicadores e alertas do estoque.
+                        </p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <a href="{{ url_for('products.list_products') }}" class="home-action-card text-decoration-none">
+                    <div class="home-action-icon home-action-icon-success">
+                        <i class="bi bi-box"></i>
+                    </div>
+
+                    <div class="home-action-body">
+                        <h3>Gerenciar produtos</h3>
+                        <p>
+                            Consulte, edite e organize os itens cadastrados.
+                        </p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <a href="{{ url_for('movements.new_movement') }}" class="home-action-card text-decoration-none">
+                    <div class="home-action-icon home-action-icon-warning">
+                        <i class="bi bi-plus-circle"></i>
+                    </div>
+
+                    <div class="home-action-body">
+                        <h3>Nova movimentação</h3>
+                        <p>
+                            Registre entradas, saídas ou ajustes de estoque.
+                        </p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+
+                <a href="{{ url_for('reports.index') }}" class="home-action-card text-decoration-none">
+
+                    <div class="home-action-icon home-action-icon-report">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
+                    </div>
+
+                    <div class="home-action-body">
+
+                        <h3>
+                            Relatórios
+                        </h3>
+
+                        <p>
+                            Consulte movimentações e exporte os dados do estoque.
+                        </p>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Bloco secundário -->
+    <div class="home-section">
+        <div class="home-info-card">
+
+            <div class="home-info-header">
+                <h2 class="home-section-title mb-1">
+                    Recursos principais
+                </h2>
+
+                <p class="home-section-subtitle mb-0">
+                    As funcionalidades centrais para o controle do estoque.
+                </p>
+            </div>
+
+            <div class="row g-3 mt-1">
+
+                <div class="col-md-4">
+                    <div class="home-info-item">
+                        <strong>Controle de produtos</strong>
+                        <span>
+                            Cadastre produtos, defina localização e estoque mínimo.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="home-info-item">
+                        <strong>Movimentações</strong>
+                        <span>
+                            Registre entradas, saídas e ajustes com rastreabilidade.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="home-info-item">
+                        <strong>Monitoramento</strong>
+                        <span>
+                            Visualize alertas e acompanhe o estoque pelo dashboard.
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
 
 </div>
 

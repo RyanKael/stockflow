@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% block title %}
+Inventário físico
+{% endblock %}
+
+{% block content %}
+
+<div class="product-inventory-page">
+
+
+    <!-- Cabeçalho -->
+
+    <div class="product-inventory-header mb-4">
+
+        <div>
+
+            <a href="{{ url_for('products.list_products') }}" class="product-inventory-back">
+                <i class="bi bi-arrow-left"></i>
+                Produtos
+            </a>
+
+            <h2 class="product-inventory-title mb-1">
+                Inventário físico
+            </h2>
+
+            <p class="product-inventory-subtitle mb-0">
+                Confira a quantidade real do produto e ajuste o estoque se necessário.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Informações do produto -->
+
+    <div class="product-inventory-product-card mb-4">
+
+        <div class="product-inventory-product-main">
+
+            <div class="product-inventory-product-icon">
+
+                <i class="bi bi-box-seam"></i>
+
+            </div>
+
+            <div>
+
+                <div class="product-inventory-product-name">
+                    {{ product.name }}
+                </div>
+
+                <div class="product-inventory-product-code">
+                    {{ product.code }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="product-inventory-product-meta">
+
+            <div class="product-inventory-meta-item">
+
+                <span>
+                    Categoria
+                </span>
+
+                <strong>
+                    {{ product.category.name if product.category else "Sem categoria" }}
+                </strong>
+
+            </div>
+
+
+            <div class="product-inventory-meta-item">
+
+                <span>
+                    Localização
+                </span>
+
+                <strong>
+                    {{ product.location or "-" }}
+                </strong>
+
+            </div>
+
+
+            <div class="product-inventory-meta-item">
+
+                <span>
+                    Estoque mínimo
+                </span>
+
+                <strong>
+                    {{ product.minimum_stock }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Comparação -->
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-md-6">
+
+            <div class="product-inventory-stock-card">
+
+                <div>
+
+                    <div class="product-inventory-stock-label">
+                        Estoque no sistema
+                    </div>
+
+                    <div class="product-inventory-stock-value">
+                        {{ product.quantity }}
+                    </div>
+
+                </div>
+
+                <div class="product-inventory-stock-icon">
+
+                    <i class="bi bi-database"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-12 col-md-6">
+
+            <div class="product-inventory-stock-card product-inventory-stock-card-physical">
+
+                <div>
+
+                    <div class="product-inventory-stock-label">
+                        Estoque físico
+                    </div>
+
+                    <div class="product-inventory-stock-value product-inventory-physical-preview">
+                        —
+                    </div>
+
+                </div>
+
+                <div class="product-inventory-stock-icon">
+
+                    <i class="bi bi-clipboard-check"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Formulário -->
+
+    <div class="product-inventory-form-card">
+
+        <form method="POST">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <div class="product-inventory-form-section">
+
+                <div class="product-inventory-form-section-header">
+
+                    <div class="product-inventory-form-section-icon">
+
+                        <i class="bi bi-clipboard-data"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Conferência física
+                        </h3>
+
+                        <p>
+                            Informe a quantidade encontrada durante a contagem.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="product-inventory-form-fields">
+
+
+                    <div>
+
+                        <label for="physical_quantity" class="form-label">
+                            Quantidade física
+                        </label>
+
+                        <input type="number" id="physical_quantity" name="physical_quantity" class="form-control"
+                            min="0" required placeholder="Informe a quantidade encontrada"
+                            data-system-quantity="{{ product.quantity }}">
+
+                        <div class="form-text">
+                            Digite a quantidade real encontrada no estoque.
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <label for="reason" class="form-label">
+                            Motivo da diferença
+                        </label>
+
+                        <textarea id="reason" name="reason" class="form-control" rows="3" maxlength="250"
+                            placeholder="Ex.: Divergência encontrada durante conferência física"></textarea>
+
+                        <div class="form-text">
+                            Obrigatório apenas quando houver diferença entre o sistema e a contagem física.
+                        </div>
+
+                    </div>
+
+
+                    <!-- Diferença -->
+
+                    <div class="product-inventory-difference">
+
+                        <span>
+                            Diferença encontrada
+                        </span>
+
+                        <strong id="inventory-difference">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Ações -->
+
+            <div class="product-inventory-actions">
+
+                <a href="{{ url_for('products.list_products') }}" class="btn btn-secondary">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+
+                    <i class="bi bi-check-lg"></i>
+
+                    Confirmar inventário
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const physicalInput = document.getElementById(
+            "physical_quantity"
+        );
+
+        const preview = document.querySelector(
+            ".product-inventory-physical-preview"
+        );
+
+        const differenceElement = document.getElementById(
+            "inventory-difference"
+        );
+
+        const systemQuantity = parseInt(
+            physicalInput.dataset.systemQuantity
+        );
+
+
+        physicalInput.addEventListener("input", function () {
+
+            if (physicalInput.value === "") {
+
+                preview.textContent = "—";
+                differenceElement.textContent = "—";
+
+                return;
+            }
+
+
+            const physicalQuantity = parseInt(
+                physicalInput.value
+            );
+
+
+            preview.textContent = physicalQuantity;
+
+
+            const difference =
+                physicalQuantity - systemQuantity;
+
+
+            if (difference > 0) {
+
+                differenceElement.textContent =
+                    "+" + difference;
+
+                differenceElement.className =
+                    "product-inventory-difference-positive";
+
+            }
+
+            else if (difference < 0) {
+
+                differenceElement.textContent =
+                    difference;
+
+                differenceElement.className =
+                    "product-inventory-difference-negative";
+
+            }
+
+            else {
+
+                differenceElement.textContent =
+                    "Sem diferença";
+
+                differenceElement.className =
+                    "product-inventory-difference-neutral";
+
+            }
+
+        });
+
+    });
+</script>
+
+{% endblock %}

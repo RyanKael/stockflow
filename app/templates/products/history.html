@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+
+{% block title %}
+Histórico do Produto
+{% endblock %}
+
+{% block content %}
+
+<div class="product-history-page">
+
+    <!-- Cabeçalho -->
+
+    <div class="product-history-header mb-4">
+
+        <div>
+
+            <a href="{{ url_for('products.list_products') }}" class="product-history-back">
+                <i class="bi bi-arrow-left"></i>
+                Produtos
+            </a>
+
+            <h2 class="product-history-title mb-1">
+                Histórico do produto
+            </h2>
+
+            <p class="product-history-subtitle mb-0">
+                {{ product.name }} · {{ product.code }}
+            </p>
+
+        </div>
+
+        <div class="product-history-current-stock">
+
+            <span class="product-history-current-stock-label">
+                Estoque atual
+            </span>
+
+            <strong>
+                {{ product.quantity }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- Resumo -->
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-lg-3">
+
+            <div class="product-history-summary-card">
+
+                <div>
+
+                    <div class="product-history-summary-label">
+                        Estoque atual
+                    </div>
+
+                    <div class="product-history-summary-value">
+                        {{ product.quantity }}
+                    </div>
+
+                </div>
+
+                <div class="product-history-summary-icon product-history-summary-primary">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-lg-3">
+
+            <div class="product-history-summary-card">
+
+                <div>
+
+                    <div class="product-history-summary-label">
+                        Entradas
+                    </div>
+
+                    <div class="product-history-summary-value">
+                        {{ total_entries }}
+                    </div>
+
+                </div>
+
+                <div class="product-history-summary-icon product-history-summary-success">
+                    <i class="bi bi-arrow-down-left"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-lg-3">
+
+            <div class="product-history-summary-card">
+
+                <div>
+
+                    <div class="product-history-summary-label">
+                        Saídas
+                    </div>
+
+                    <div class="product-history-summary-value">
+                        {{ total_exits }}
+                    </div>
+
+                </div>
+
+                <div class="product-history-summary-icon product-history-summary-danger">
+                    <i class="bi bi-arrow-up-right"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-lg-3">
+
+            <div class="product-history-summary-card">
+
+                <div>
+
+                    <div class="product-history-summary-label">
+                        Ajustes
+                    </div>
+
+                    <div class="product-history-summary-value">
+                        {{ total_adjustments }}
+                    </div>
+
+                </div>
+
+                <div class="product-history-summary-icon product-history-summary-warning">
+                    <i class="bi bi-sliders"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Informações do produto -->
+
+    <div class="product-history-info-card mb-4">
+
+        <div class="product-history-info-item">
+
+            <span>
+                Categoria
+            </span>
+
+            <strong>
+                {{ product.category.name if product.category else "Sem categoria" }}
+            </strong>
+
+        </div>
+
+        <div class="product-history-info-item">
+
+            <span>
+                Localização
+            </span>
+
+            <strong>
+                {{ product.location or "-" }}
+            </strong>
+
+        </div>
+
+        <div class="product-history-info-item">
+
+            <span>
+                Estoque mínimo
+            </span>
+
+            <strong>
+                {{ product.minimum_stock }}
+            </strong>
+
+        </div>
+
+        <div class="product-history-info-item">
+
+            <span>
+                Status
+            </span>
+
+            <strong>
+                {{ "Ativo" if product.active else "Inativo" }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- Histórico -->
+
+    <div class="product-history-table-card">
+
+        <div class="product-history-table-header">
+
+            <div>
+
+                <h3>
+                    Movimentações
+                </h3>
+
+                <p>
+                    Histórico completo de movimentações deste produto.
+                </p>
+
+            </div>
+
+            <span class="product-history-count">
+                {{ pagination.total }}
+                movimentação{{ "" if pagination.total == 1 else "ões" }}
+            </span>
+
+        </div>
+
+
+        {% if movements %}
+
+        <div class="product-history-mobile-scroll-hint">
+
+            <i class="bi bi-arrow-left-right"></i>
+
+            Deslize para ver mais
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Data
+                        </th>
+
+                        <th>
+                            Tipo
+                        </th>
+
+                        <th>
+                            Quantidade
+                        </th>
+
+                        <th>
+                            Antes
+                        </th>
+
+                        <th>
+                            Depois
+                        </th>
+
+                        <th>
+                            Motivo
+                        </th>
+
+                        <th>
+                            Usuário
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for movement in movements %}
+
+                    <tr>
+
+                        <td>
+                            {{ movement.created_at|local_datetime }}
+                        </td>
+
+
+                        <td>
+
+                            {% if movement.movement_type.value == "Entrada" %}
+
+                            <span class="badge bg-success">
+                                Entrada
+                            </span>
+
+                            {% elif movement.movement_type.value == "Saída" %}
+
+                            <span class="badge bg-danger">
+                                Saída
+                            </span>
+
+                            {% else %}
+
+                            <span class="badge bg-warning text-dark">
+                                Ajuste
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <strong>
+                                {{ movement.quantity }}
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+                            {{ movement.previous_quantity if movement.previous_quantity is not none else "-" }}
+                        </td>
+
+
+                        <td>
+
+                            {% if movement.previous_quantity is none %}
+
+                                -
+
+                            {% elif movement.movement_type.value == "Entrada" %}
+
+                                {{ movement.previous_quantity + movement.quantity }}
+
+                            {% elif movement.movement_type.value == "Saída" %}
+
+                                {{ movement.previous_quantity - movement.quantity }}
+
+                            {% else %}
+
+                                {{ movement.quantity }}
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+                            {{ movement.reason or "-" }}
+                        </td>
+
+
+                        <td>
+
+                            {% if movement.user %}
+
+                            {{ movement.user.username }}
+
+                            {% else %}
+
+                            -
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        {% if pagination.pages > 1 %}
+
+        <div class="product-history-pagination">
+
+            <div class="product-history-pagination-info">
+
+                Mostrando
+                {{ pagination.first }}
+                –
+                {{ pagination.last }}
+                de
+                {{ pagination.total }}
+                movimentações
+
+            </div>
+
+
+            <nav aria-label="Paginação do histórico">
+
+                <ul class="pagination pagination-sm mb-0">
+
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+
+                        <a class="page-link" href="{% if pagination.has_prev %}
+                                    {{ url_for(
+                                        'products.product_history',
+                                        id=product.id,
+                                        page=pagination.prev_num
+                                    ) }}
+                                {% else %}
+                                    #
+                                {% endif %}">
+                            Anterior
+                        </a>
+
+                    </li>
+
+
+                    {% for page_num in pagination.iter_pages(
+                    left_edge=1,
+                    right_edge=1,
+                    left_current=2,
+                    right_current=2
+                    ) %}
+
+                    {% if page_num %}
+
+                    <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+
+                        <a class="page-link" href="{{ url_for(
+                                            'products.product_history',
+                                            id=product.id,
+                                            page=page_num
+                                        ) }}">
+                            {{ page_num }}
+                        </a>
+
+                    </li>
+
+                    {% else %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            …
+                        </span>
+                    </li>
+
+                    {% endif %}
+
+                    {% endfor %}
+
+
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+
+                        <a class="page-link" href="{% if pagination.has_next %}
+                                    {{ url_for(
+                                        'products.product_history',
+                                        id=product.id,
+                                        page=pagination.next_num
+                                    ) }}
+                                {% else %}
+                                    #
+                                {% endif %}">
+                            Próxima
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </nav>
+
+        </div>
+
+        {% endif %}
+
+
+        {% else %}
+
+        <div class="product-history-empty-state">
+
+            <div class="product-history-empty-icon">
+                <i class="bi bi-clock-history"></i>
+            </div>
+
+            <h3>
+                Nenhuma movimentação registrada
+            </h3>
+
+            <p>
+                Este produto ainda não possui histórico de movimentações.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

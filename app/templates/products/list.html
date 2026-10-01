@@ -6,115 +6,1085 @@ Produtos
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="products-header mb-4">
 
     <div>
-        <h2>Produtos</h2>
-        <p class="text-muted">
-            Gerencie os produtos cadastrados.
+        <h2 class="products-title mb-1">
+            Produtos
+        </h2>
+
+        <p class="products-subtitle mb-0">
+            Gerencie os produtos cadastrados no estoque.
         </p>
     </div>
 
-    <a
-        href="{{ url_for('products.new_product') }}"
-        class="btn btn-primary">
-         
-        + Novo Produto
+    <div class="products-header-actions">
 
-    </a>
+        <a href="{{ url_for(
+            'products.export_pdf',
+            search=search,
+            stock=stock_filter,
+            category=selected_category
+            ) }}" class="btn btn-outline-secondary products-export-button" target="_blank">
+            <i class="bi bi-file-earmark-pdf"></i>
+            Exportar PDF
+        </a>
+
+        {% if current_user.role.name in ["ADMIN", "MANAGER"] %}
+
+        <a href="{{ url_for('products.new_product') }}" class="btn btn-primary products-new-button">
+            <i class="bi bi-plus-lg"></i>
+            Novo produto
+        </a>
+
+        {% endif %}
+
+    </div>
+
 </div>
 
-<div class="card shadow-sm">
-    
-    <div class="card-body">
-        
-        {% if products %}
-        
-        <table class="table table-hover align-middle">
-            
-            <thead>
-                
-                <tr>
-                    <th>Código</th>
-                    <th>Nome</th>
-                    <th>Quantidade</th>
-                    <th>Estoque mínimo</th>
-                    <th>Localização</th>
-                    <th>Status</th>
-                    <th class="text-end">Ações</th>
-                </tr>
-                
-            </thead>
-            
-            <tbody>
-                
-                {% for product in products %}
-                
-                <tr>
-                    
-                    <td>{{ product.code }}</td>
-                    
-                    <td>{{ product.name }}</td>
-                    
-                    <td>{{ product.quantity }}</td>
+<!-- Resumo do estoque -->
 
-                    <td>{{ product.minimum_stock }}</td>
-                    
-                    <td>{{ product.location or "-" }}</td>
-                    
-                    <td>
-                        
-                        {% if product.active %}
-                        <span class="badge bg-success">
-                            Ativo
-                        </span>
-                        {% else %}
-                        <span class="badge bg-danger">
-                            Inativo
-                        </span>
-                        {% endif %}
-                        
-                    </td>
-                    
-                    <td class="text-end">
+<div class="row g-3 mb-4">
 
-                            <a        
-                                href="{{ url_for('products.edit_product', id=product.id) }}"
-                                class="btn btn-sm btn-outline-primary">
-                                
-                                
-                                Editar
-                                
-                            </a>
+    <!-- Total de produtos -->
+    <div class="col-6 col-lg-3">
+        <div class="product-summary-card product-summary-primary">
 
+            <div>
+                <div class="product-summary-label">
+                    Produtos
+                </div>
 
-                        <button
-                            class="btn btn-sm btn-outline-danger"
-                            disabled>
-                            Excluir
-                        </button>
+                <div class="product-summary-value">
+                    {{ total_products }}
+                </div>
+            </div>
 
-                    </td>
+            <div class="product-summary-icon">
+                <i class="bi bi-box-seam"></i>
+            </div>
 
-                </tr>
-                
-                {% endfor %}
-                
-            </tbody>
-            
-        </table>
-        
-        {% else %}
-        
-        <div class="alert alert-secondary mb-0">
-            
-            Nenhum produto cadastrado.
-            
         </div>
+    </div>
+
+
+    <!-- Estoque normal -->
+    <div class="col-6 col-lg-3">
+        <div class="product-summary-card product-summary-success">
+
+            <div>
+                <div class="product-summary-label">
+                    Estoque normal
+                </div>
+
+                <div class="product-summary-value">
+                    {{ normal_stock }}
+                </div>
+            </div>
+
+            <div class="product-summary-icon">
+                <i class="bi bi-check-circle"></i>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Estoque baixo -->
+    <div class="col-6 col-lg-3">
+
+        <a href="{{ url_for('products.list_products', stock='low') }}"
+            class="text-decoration-none text-reset product-summary-link">
+
+            <div class="product-summary-card product-summary-warning">
+
+                <div>
+                    <div class="product-summary-label">
+                        Estoque baixo
+                    </div>
+
+                    <div class="product-summary-value">
+                        {{ low_stock }}
+                    </div>
+                </div>
+
+                <div class="product-summary-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- Sem estoque -->
+    <div class="col-6 col-lg-3">
+
+        <a href="{{ url_for('products.list_products', stock='out') }}"
+            class="text-decoration-none text-reset product-summary-link">
+
+            <div class="product-summary-card product-summary-danger">
+
+                <div>
+                    <div class="product-summary-label">
+                        Sem estoque
+                    </div>
+
+                    <div class="product-summary-value">
+                        {{ out_of_stock }}
+                    </div>
+                </div>
+
+                <div class="product-summary-icon">
+                    <i class="bi bi-x-circle"></i>
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <!-- Alertas de estoque -->
+
+    {% if out_of_stock > 0 or low_stock > 0 %}
+
+    <div class="stock-alert mb-4">
+
+        <div class="stock-alert-content">
+
+            <div>
+
+                <strong class="stock-alert-title">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Atenção ao estoque
+                </strong>
+
+                <div class="stock-alert-message">
+
+                    {% if out_of_stock > 0 %}
+
+                    <span>
+                        <i class="bi bi-circle-fill stock-alert-dot stock-alert-dot-danger"></i>
+
+                        {{ out_of_stock }}
+                        produto{{ "" if out_of_stock == 1 else "s" }}
+                        sem estoque
+                    </span>
+
+                    {% endif %}
+
+
+                    {% if low_stock > 0 %}
+
+                    <span>
+                        <i class="bi bi-circle-fill stock-alert-dot stock-alert-dot-warning"></i>
+
+                        {{ low_stock }}
+                        produto{{ "" if low_stock == 1 else "s" }}
+                        com estoque baixo
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="stock-alert-actions">
+
+                {% if out_of_stock > 0 %}
+
+                <a href="{{ url_for(
+                    'products.list_products',
+                    stock='out'
+                ) }}" class="btn btn-sm btn-outline-danger">
+
+                    Ver sem estoque
+
+                </a>
+
+                {% endif %}
+
+
+                {% if low_stock > 0 %}
+
+                <a href="{{ url_for(
+                    'products.list_products',
+                    stock='low'
+                ) }}" class="btn btn-sm btn-outline-warning">
+
+                    Ver estoque baixo
+
+                </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
     </div>
 
     {% endif %}
 
-</div>
+    <!-- Busca e ações -->
 
-{% endblock %}
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-3 products-actions">
+
+        <form method="GET" action="{{ url_for('products.list_products') }}"
+            class="d-flex flex-grow-1 products-search-form">
+
+            <!-- Preserva filtro de estoque -->
+
+            {% if stock_filter %}
+
+            <input type="hidden" name="stock" value="{{ stock_filter }}">
+
+            {% endif %}
+
+
+            <!-- Preserva ordenação -->
+
+            <input type="hidden" name="sort" value="{{ sort }}">
+
+            <input type="hidden" name="direction" value="{{ direction }}">
+
+
+            <!-- Busca -->
+
+            <div class="products-search-box">
+
+                <i class="bi bi-search products-search-icon"></i>
+
+                <input type="search" name="search" class="form-control"
+                    placeholder="Buscar por nome, código ou localização..." value="{{ search }}">
+
+            </div>
+
+
+            <!-- Categoria -->
+
+            <div class="products-category-filter">
+
+                <select name="category" class="form-select" aria-label="Filtrar por categoria">
+
+                    <option value="">
+                        Todas as categorias
+                    </option>
+
+                    {% for category in categories %}
+
+                    <option value="{{ category.id }}" {% if selected_category==category.id %} selected {% endif %}>
+                        {{ category.name }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Buscar -->
+
+            <button type="submit" class="btn btn-outline-primary">
+
+                <i class="bi bi-search"></i>
+
+                Buscar
+
+            </button>
+
+
+            <!-- Limpar -->
+
+            {% if search or selected_category %}
+
+            <a href="{{ url_for(
+                'products.list_products',
+                stock=stock_filter,
+                sort=sort,
+                direction=direction
+            ) }}" class="btn btn-outline-secondary text-nowrap clear-search-btn">
+
+                <i class="bi bi-x-lg"></i>
+
+                Limpar
+
+            </a>
+
+            {% endif %}
+
+        </form>
+
+    </div>
+
+    <!-- Filtros de estoque -->
+
+    <div class="products-stock-filters mb-4">
+
+
+        <!-- Todos -->
+
+        <a href="{{ url_for(
+                'products.list_products',
+                search=search,
+                category=selected_category,
+                sort=sort,
+                direction=direction
+            ) }}" class="products-filter-btn
+            {% if not stock_filter %}
+                active
+            {% endif %}">
+            Todos
+        </a>
+
+
+        <!-- Estoque normal -->
+
+        <a href="{{ url_for(
+                'products.list_products',
+                search=search,
+                category=selected_category,
+                stock='normal',
+                sort=sort,
+                direction=direction
+            ) }}" class="products-filter-btn products-filter-normal
+            {% if stock_filter == 'normal' %}
+                active
+            {% endif %}">
+
+            <i class="bi bi-circle-fill"></i>
+
+            Normal
+
+        </a>
+
+
+        <!-- Estoque baixo -->
+
+        <a href="{{ url_for(
+                'products.list_products',
+                search=search,
+                category=selected_category,
+                stock='low',
+                sort=sort,
+                direction=direction
+            ) }}" class="products-filter-btn products-filter-low
+            {% if stock_filter == 'low' %}
+                active
+            {% endif %}">
+
+            <i class="bi bi-circle-fill"></i>
+
+            Estoque baixo
+
+        </a>
+
+
+        <!-- Sem estoque -->
+
+        <a href="{{ url_for(
+                'products.list_products',
+                search=search,
+                category=selected_category,
+                stock='out',
+                sort=sort,
+                direction=direction
+            ) }}" class="products-filter-btn products-filter-out
+            {% if stock_filter == 'out' %}
+                active
+            {% endif %}">
+
+            <i class="bi bi-circle-fill"></i>
+
+            Sem estoque
+
+        </a>
+
+    </div>
+
+
+    <!-- Filtro ativo -->
+
+    {% if stock_filter == "low" %}
+
+    <div class="stock-filter-bar stock-filter-low mb-3">
+
+        <div class="stock-filter-message">
+
+            <i class="bi bi-exclamation-triangle"></i>
+
+            <span>
+                Exibindo produtos com estoque baixo
+            </span>
+
+        </div>
+
+        <a href="{{ url_for('products.list_products') }}" class="stock-filter-button">
+            Ver todos
+        </a>
+
+    </div>
+
+    {% elif stock_filter == "out" %}
+
+    <div class="stock-filter-bar stock-filter-out mb-3">
+
+        <div class="stock-filter-message">
+
+            <i class="bi bi-x-circle"></i>
+
+            <span>
+                Exibindo produtos sem estoque
+            </span>
+
+        </div>
+
+        <a href="{{ url_for('products.list_products') }}" class="stock-filter-button">
+            Ver todos
+        </a>
+
+    </div>
+
+    {% endif %}
+
+    <!-- Tabela -->
+
+    <div class="card shadow-sm products-table-card">
+
+        <div class="card-body">
+
+            {% if products %}
+
+            <div class="products-mobile-scroll-hint">
+                <i class="bi bi-arrow-left-right"></i>
+                Deslize para ver mais
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                <a href="{{ url_for(
+                                        'products.list_products',
+                                        search=search,
+                                        stock=stock_filter,
+                                        category=selected_category,
+                                        sort='code',
+                                        direction='desc' if sort == 'code' and direction == 'asc' else 'asc'
+                                    ) }}" class="products-sort-link">
+                                    Código
+
+                                    {% if sort == "code" %}
+                                    <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+
+
+                            <th>
+                                <a href="{{ url_for(
+                                        'products.list_products',
+                                        search=search,
+                                        stock=stock_filter,
+                                        category=selected_category,
+                                        sort='name',
+                                        direction='desc' if sort == 'name' and direction == 'asc' else 'asc'
+                                    ) }}" class="products-sort-link">
+                                    Nome
+
+                                    {% if sort == "name" %}
+                                    <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                Categoria
+                            </th>
+
+                            <th>
+                                <a href="{{ url_for(
+                                        'products.list_products',
+                                        search=search,
+                                        stock=stock_filter,
+                                        category=selected_category,
+                                        sort='quantity',
+                                        direction='desc' if sort == 'quantity' and direction == 'asc' else 'asc'
+                                    ) }}" class="products-sort-link">
+                                    Quantidade
+
+                                    {% if sort == "quantity" %}
+                                    <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+
+
+                            <th>
+                                <a href="{{ url_for(
+                                        'products.list_products',
+                                        search=search,
+                                        stock=stock_filter,
+                                        category=selected_category,
+                                        sort='minimum_stock',
+                                        direction='desc' if sort == 'minimum_stock' and direction == 'asc' else 'asc'
+                                    ) }}" class="products-sort-link">
+                                    Estoque mínimo
+
+                                    {% if sort == "minimum_stock" %}
+                                    <i class="bi bi-arrow-{{ 'up' if direction == 'asc' else 'down' }}"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+
+                            <th>Situação</th>
+
+                            <th>Localização</th>
+
+                            <th>Status</th>
+
+                            <th class="text-end">
+                                Ações
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for product in products %}
+
+                        <tr class="
+                            {% if product.quantity == 0 %}
+                                product-row-out
+                            {% elif product.quantity <= product.minimum_stock %}
+                                product-row-low
+                            {% endif %}
+
+                        ">
+
+
+                            <!-- Código -->
+
+                            <td>
+                                {{ product.code }}
+                            </td>
+
+
+                            <!-- Nome -->
+
+                            <td>
+
+                                <strong>
+                                    {{ product.name }}
+                                </strong>
+
+                            </td>
+
+                            <!-- Categoria -->
+
+                            <td>
+
+                                {% if product.category %}
+
+                                <span class="product-category-badge">
+
+                                    <i class="bi bi-tag"></i>
+
+                                    {{ product.category.name }}
+
+                                </span>
+
+                                {% else %}
+
+                                <span class="product-category-empty">
+                                    Sem categoria
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Quantidade -->
+
+                            <td>
+
+                                <strong>
+                                    {{ product.quantity }}
+                                </strong>
+
+                                unidades
+
+                            </td>
+
+
+                            <!-- Estoque mínimo -->
+
+                            <td>
+                                {{ product.minimum_stock }}
+                            </td>
+
+
+                            <!-- Situação do estoque -->
+
+                            <td>
+
+                                {% if product.quantity == 0 %}
+
+                                <span class="badge bg-danger">
+
+                                    Sem estoque
+
+                                </span>
+
+                                {% elif product.quantity <= product.minimum_stock %} <span
+                                    class="badge bg-warning text-dark">
+
+                                    Estoque baixo
+
+                                    </span>
+
+                                    {% else %}
+
+                                    <span class="badge bg-success">
+
+                                        Normal
+
+                                    </span>
+
+                                    {% endif %}
+
+                            </td>
+
+
+                            <!-- Localização -->
+
+                            <td>
+                                {{ product.location or "-" }}
+                            </td>
+
+
+                            <!-- Status -->
+
+                            <td>
+
+                                {% if product.active %}
+
+                                <span class="badge bg-success">
+
+                                    Ativo
+
+                                </span>
+
+                                {% else %}
+
+                                <span class="badge bg-secondary">
+
+                                    Inativo
+
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Ações -->
+
+                            <td class="text-end">
+
+                                <div class="d-inline-flex align-items-center gap-2">
+
+                                    <div class="d-inline-flex align-items-center gap-2">
+
+                                        <a href="{{ url_for(
+                                                'movements.new_movement',
+                                                product_id=product.id,
+                                                movement_type='Entrada',
+                                                next=request.full_path
+                                            ) }}" class="btn btn-sm product-action-button product-action-entry"
+                                            title="Registrar entrada">
+                                            <i class="bi bi-arrow-down-left"></i>
+                                            <span>Entrada</span>
+                                        </a>
+
+                                        {% if product.quantity > 0 %}
+
+                                        <a href="{{ url_for(
+                                                'movements.new_movement',
+                                                product_id=product.id,
+                                                movement_type='Saída',
+                                                next=request.full_path
+                                            ) }}" class="btn btn-sm product-action-button product-action-exit"
+                                            title="Registrar saída">
+                                            <i class="bi bi-arrow-up-right"></i>
+                                            <span>Saída</span>
+                                        </a>
+
+                                        {% else %}
+
+                                        <button type="button"
+                                            class="btn btn-sm product-action-button product-action-exit" disabled
+                                            title="Produto sem estoque">
+                                            <i class="bi bi-arrow-up-right"></i>
+                                            <span>Saída</span>
+                                        </button>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                    {% if current_user.role.name in ["ADMIN", "MANAGER"] %}
+
+                                    <a href="{{ url_for(
+                                            'products.edit_product',
+                                            id=product.id,
+                                            next=request.full_path
+                                        ) }}" class="btn btn-sm btn-outline-secondary">
+                                        Editar
+                                    </a>
+
+                                    {% endif %}
+
+                                    {% if current_user.role.name in ["ADMIN", "MANAGER"] %}
+
+                                    <div class="dropdown">
+
+                                        <button class="btn btn-sm btn-outline-secondary products-more-button"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                            aria-label="Mais ações">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end">
+
+                                            <li>
+
+                                                <a href="{{ url_for(
+                                                        'products.product_history',
+                                                        id=product.id
+                                                    ) }}" class="dropdown-item">
+
+                                                    <i class="bi bi-clock-history"></i>
+
+                                                    Ver histórico
+
+                                                </a>
+
+                                            </li>
+
+                                            {% if current_user.role.name in ["ADMIN", "MANAGER"] %}
+
+                                            <li>
+
+                                                <a href="{{ url_for(
+                                                        'products.product_inventory',
+                                                        id=product.id
+                                                    ) }}" class="dropdown-item">
+
+                                                    <i class="bi bi-clipboard-check"></i>
+
+                                                    Conferir estoque
+
+                                                </a>
+
+                                            </li>
+
+                                            {% endif %}
+
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+
+                                            {% if product.active %}
+                                            <li>
+                                                <form action="{{ url_for(
+                                                        'products.deactivate_product',
+                                                        id=product.id
+                                                    ) }}" method="POST">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="submit"
+                                                        class="dropdown-item products-dropdown-warning">
+                                                        <i class="bi bi-pause-circle"></i>
+                                                        Desativar
+                                                    </button>
+                                                </form>
+                                            </li>
+
+                                            {% else %}
+
+                                            <li>
+                                                <form action="{{ url_for(
+                                                        'products.activate_product',
+                                                        id=product.id
+                                                    ) }}" method="POST">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="submit"
+                                                        class="dropdown-item products-dropdown-success">
+                                                        <i class="bi bi-check-circle"></i>
+                                                        Reativar
+                                                    </button>
+                                                </form>
+                                            </li>
+
+                                            {% endif %}
+
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+
+                                            <li>
+                                                <form action="{{ url_for(
+                                                        'products.delete_product',
+                                                        id=product.id
+                                                    ) }}" method="POST"
+                                                >
+                                                    <input
+                                                        type="hidden"
+                                                        name="csrf_token"
+                                                        value="{{ csrf_token() }}"
+                                                    >
+                                                    <button type="submit" class="dropdown-item products-dropdown-danger"
+                                                        onclick="return confirm('Deseja realmente excluir este produto?')">
+                                                        <i class="bi bi-trash"></i>
+                                                        Excluir
+                                                    </button>
+                                                </form>
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- Paginação -->
+
+            {% if pagination.pages > 1 %}
+
+            <div class="products-pagination">
+
+                <div class="products-pagination-info">
+                    Mostrando
+                    {{ pagination.first }}
+                    –
+                    {{ pagination.last }}
+                    de
+                    {{ pagination.total }}
+                    produtos
+                </div>
+
+                <nav aria-label="Paginação dos produtos">
+
+                    <ul class="pagination pagination-sm mb-0">
+
+                        <!-- Anterior -->
+
+                        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+
+                            <a class="page-link" href="{% if pagination.has_prev %}
+                                    {{ url_for(
+                                        'products.list_products',
+                                        page=pagination.prev_num,
+                                        search=search,
+                                        stock=stock_filter,
+                                        category=selected_category,
+                                        sort=sort,
+                                        direction=direction
+                                    ) }}
+                                {% else %}
+                                    #
+                                {% endif %}">
+                                Anterior
+                            </a>
+
+                        </li>
+
+
+                        <!-- Páginas -->
+
+                        {% for page_num in pagination.iter_pages(
+                        left_edge=1,
+                        right_edge=1,
+                        left_current=2,
+                        right_current=2
+                        ) %}
+
+                        {% if page_num %}
+
+                        <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+
+                            <a class="page-link" href="{{ url_for(
+                                        'products.list_products',
+                                        page=page_num,
+                                        search=search,
+                                        stock=stock_filter,
+                                        category=selected_category,
+                                        sort=sort,
+                                        direction=direction
+                                    ) }}">
+                                {{ page_num }}
+                            </a>
+
+                        </li>
+
+                        {% else %}
+
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                …
+                            </span>
+                        </li>
+
+                        {% endif %}
+
+                        {% endfor %}
+
+
+                        <!-- Próxima -->
+
+                        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+
+                            <a class="page-link" href="{% if pagination.has_next %}
+                                    {{ url_for(
+                                        'products.list_products',
+                                        page=pagination.next_num,
+                                        search=search,
+                                        stock=stock_filter,
+                                        category=selected_category,
+                                        sort=sort,
+                                        direction=direction
+                                    ) }}
+                                {% else %}
+                                    #
+                                {% endif %}">
+                                Próxima
+                            </a>
+
+                        </li>
+
+                    </ul>
+
+                </nav>
+
+            </div>
+
+            {% endif %}
+
+
+            {% else %}
+
+            <div class="text-center py-4">
+
+                {% if search or stock_filter or selected_category %}
+
+                <div class="fs-2 mb-2">
+                    🔎
+                </div>
+
+                <h5>
+                    Nenhum produto encontrado
+                </h5>
+
+                <p class="text-muted mb-3">
+                    Não encontramos produtos para os filtros selecionados.
+                </p>
+
+                <a href="{{ url_for('products.list_products') }}" class="btn btn-sm btn-outline-primary">
+
+                    Limpar filtros
+
+                </a>
+
+                {% else %}
+
+                <div class="fs-2 mb-2">
+                    📦
+                </div>
+
+                <h5>
+                    Nenhum produto cadastrado
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Comece adicionando o primeiro produto ao estoque.
+                </p>
+
+                {% endif %}
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const scrollPosition = sessionStorage.getItem(
+                "products-sort-scroll"
+            );
+
+            if (scrollPosition !== null) {
+
+                window.scrollTo({
+                    top: parseInt(scrollPosition),
+                    behavior: "instant"
+                });
+
+                sessionStorage.removeItem(
+                    "products-sort-scroll"
+                );
+            }
+
+
+            document
+                .querySelectorAll(".products-sort-link")
+                .forEach(function (link) {
+
+                    link.addEventListener("click", function () {
+
+                        sessionStorage.setItem(
+                            "products-sort-scroll",
+                            window.scrollY
+                        );
+
+                    });
+
+                });
+
+        });
+    </script>
+
+    {% endblock %}

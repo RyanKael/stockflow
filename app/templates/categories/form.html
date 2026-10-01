@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="category-form-page">
+
+
+    <!-- =====================================================
+         CABEÇALHO
+         ===================================================== -->
+
+    <div class="category-form-header">
+
+        <div>
+
+            <a
+                href="{{ url_for('categories.list_categories') }}"
+                class="category-form-back"
+            >
+
+                <i class="bi bi-arrow-left"></i>
+
+                Categorias
+
+            </a>
+
+
+            <h1 class="category-form-title">
+                {{ title }}
+            </h1>
+
+
+            <p class="category-form-subtitle">
+
+                {% if category %}
+
+                    Atualize as informações da categoria.
+
+                {% else %}
+
+                    Cadastre uma nova categoria para organizar os produtos.
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         FORMULÁRIO
+         ===================================================== -->
+
+    <div class="category-form-card">
+
+
+        <form
+            method="POST"
+            novalidate
+        >
+
+            {{ form.hidden_tag() }}
+
+
+
+            <!-- Nome -->
+
+            <div class="category-form-section">
+
+                <div class="category-form-section-header">
+
+                    <div class="category-form-section-icon">
+
+                        <i class="bi bi-tag"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h2>
+                            Informações da categoria
+                        </h2>
+
+                        <p>
+                            Defina o nome e o status da categoria.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="category-form-fields">
+
+
+                    <div>
+
+                        {{ form.name.label(
+                            class="form-label"
+                        ) }}
+
+
+                        {{ form.name(
+                            class="form-control"
+                            + (" is-invalid" if form.name.errors else ""),
+                            placeholder="Ex.: Material escolar",
+                            autocomplete="off"
+                        ) }}
+
+
+                        {% if form.name.errors %}
+
+                            <div class="invalid-feedback">
+
+                                {% for error in form.name.errors %}
+
+                                    {{ error }}
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="form-text">
+
+                                Use um nome claro e fácil de identificar.
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <!-- Status -->
+
+                    <div class="category-active-field">
+
+                        <div class="form-check form-switch">
+
+                            {{ form.active(
+                                class="form-check-input",
+                                role="switch"
+                            ) }}
+
+
+                            {{ form.active.label(
+                                class="form-check-label"
+                            ) }}
+
+                        </div>
+
+
+                        <div class="form-text">
+
+                            Categorias inativas permanecem registradas,
+                            mas podem ser ocultadas das novas operações.
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 AÇÕES
+                 ================================================= -->
+
+            <div class="category-form-actions">
+
+
+                <a
+                    href="{{ url_for('categories.list_categories') }}"
+                    class="btn btn-secondary"
+                >
+
+                    Cancelar
+
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+
+                    <i class="bi bi-check-lg"></i>
+
+                    {% if category %}
+
+                        Salvar alterações
+
+                    {% else %}
+
+                        Cadastrar categoria
+
+                    {% endif %}
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+
+{% endblock %}

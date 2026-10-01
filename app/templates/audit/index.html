@@ -1,0 +1,870 @@
+{% extends "base.html" %}
+
+{% block title %}
+Auditoria
+{% endblock %}
+
+{% block content %}
+
+<div class="audit-page">
+
+
+    <!-- =====================================================
+         CABEÇALHO
+         ===================================================== -->
+
+    <div class="audit-header mb-4">
+
+        <div>
+
+            <h2 class="audit-title mb-1">
+                Auditoria
+            </h2>
+
+            <p class="audit-subtitle mb-0">
+                Acompanhe as principais ações realizadas no sistema.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RESUMO
+         ===================================================== -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- Total -->
+
+        <div class="col-6 col-lg-3">
+
+            <div class="audit-summary-card">
+
+                <div>
+
+                    <div class="audit-summary-label">
+                        Registros
+                    </div>
+
+                    <div class="audit-summary-value">
+                        {{ total_logs }}
+                    </div>
+
+                </div>
+
+
+                <div class="audit-summary-icon audit-summary-primary">
+
+                    <i class="bi bi-shield-check"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Criações -->
+
+        <div class="col-6 col-lg-3">
+
+            <div class="audit-summary-card">
+
+                <div>
+
+                    <div class="audit-summary-label">
+                        Criações
+                    </div>
+
+                    <div class="audit-summary-value">
+                        {{ total_creates }}
+                    </div>
+
+                </div>
+
+
+                <div class="audit-summary-icon audit-summary-success">
+
+                    <i class="bi bi-plus-circle"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Alterações -->
+
+        <div class="col-6 col-lg-3">
+
+            <div class="audit-summary-card">
+
+                <div>
+
+                    <div class="audit-summary-label">
+                        Alterações
+                    </div>
+
+                    <div class="audit-summary-value">
+                        {{ total_updates }}
+                    </div>
+
+                </div>
+
+
+                <div class="audit-summary-icon audit-summary-warning">
+
+                    <i class="bi bi-pencil-square"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Operações sensíveis -->
+
+        <div class="col-6 col-lg-3">
+
+            <div class="audit-summary-card">
+
+                <div>
+
+                    <div class="audit-summary-label">
+                        Operações sensíveis
+                    </div>
+
+                    <div class="audit-summary-value">
+                        {{ total_sensitive }}
+                    </div>
+
+                </div>
+
+
+                <div class="audit-summary-icon audit-summary-danger">
+
+                    <i class="bi bi-exclamation-triangle"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         FILTROS
+         ===================================================== -->
+
+    <div class="audit-filter-card mb-4">
+
+        <div class="audit-filter-header">
+
+            <div>
+
+                <h3>
+                    Filtros
+                </h3>
+
+                <p>
+                    Refine os registros exibidos na auditoria.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <form
+            method="GET"
+            action="{{ url_for('audit.index') }}"
+        >
+
+            <div class="row g-3">
+
+
+                <!-- Ação -->
+
+                <div class="col-12 col-md-6 col-xl-3">
+
+                    <label
+                        for="action"
+                        class="form-label"
+                    >
+                        Ação
+                    </label>
+
+                    <select
+                        name="action"
+                        id="action"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            Todas as ações
+                        </option>
+
+                        {% for action in actions %}
+
+                        <option
+                            value="{{ action }}"
+                            {% if selected_action == action %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ action }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- Entidade -->
+
+                <div class="col-12 col-md-6 col-xl-3">
+
+                    <label
+                        for="entity_type"
+                        class="form-label"
+                    >
+                        Entidade
+                    </label>
+
+                    <select
+                        name="entity_type"
+                        id="entity_type"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            Todas as entidades
+                        </option>
+
+                        {% for entity_type in entity_types %}
+
+                        <option
+                            value="{{ entity_type }}"
+                            {% if selected_entity_type == entity_type %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ entity_type }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- Usuário -->
+
+                <div class="col-12 col-md-6 col-xl-3">
+
+                    <label
+                        for="user_id"
+                        class="form-label"
+                    >
+                        Usuário
+                    </label>
+
+                    <select
+                        name="user_id"
+                        id="user_id"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            Todos os usuários
+                        </option>
+
+                        {% for user in users %}
+
+                        <option
+                            value="{{ user.id }}"
+                            {% if selected_user_id == user.id %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ user.username }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- Data inicial -->
+
+                <div class="col-12 col-md-6 col-xl-3">
+
+                    <label
+                        for="start_date"
+                        class="form-label"
+                    >
+                        Data inicial
+                    </label>
+
+                    <input
+                        type="date"
+                        name="start_date"
+                        id="start_date"
+                        class="form-control"
+                        value="{{ start_date }}"
+                    >
+
+                </div>
+
+
+                <!-- Data final -->
+
+                <div class="col-12 col-md-6 col-xl-3">
+
+                    <label
+                        for="end_date"
+                        class="form-label"
+                    >
+                        Data final
+                    </label>
+
+                    <input
+                        type="date"
+                        name="end_date"
+                        id="end_date"
+                        class="form-control"
+                        value="{{ end_date }}"
+                    >
+
+                </div>
+
+
+            </div>
+
+
+            <!-- Ações -->
+
+            <div class="audit-filter-actions">
+
+                <div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        <i class="bi bi-funnel"></i>
+                        Aplicar filtros
+                    </button>
+
+
+                    {% if
+                        selected_action
+                        or selected_entity_type
+                        or selected_user_id
+                        or start_date
+                        or end_date
+                    %}
+
+                    <a
+                        href="{{ url_for('audit.index') }}"
+                        class="btn btn-secondary"
+                    >
+                        <i class="bi bi-x-lg"></i>
+                        Limpar
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         TABELA
+         ===================================================== -->
+
+    <div class="audit-table-card">
+
+        <div class="audit-table-header">
+
+            <div>
+
+                <h3>
+                    Registros de auditoria
+                </h3>
+
+                <p>
+                    Histórico das principais ações realizadas no sistema.
+                </p>
+
+            </div>
+
+
+            <span class="audit-result-count">
+
+                {{ pagination.total }}
+
+                registro{{ "" if pagination.total == 1 else "s" }}
+
+            </span>
+
+        </div>
+
+
+        {% if logs %}
+
+
+            <!-- Mobile -->
+
+            <div class="audit-mobile-scroll-hint">
+
+                <i class="bi bi-arrow-left-right"></i>
+
+                Deslize para ver mais
+
+            </div>
+
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Data
+                            </th>
+
+                            <th>
+                                Usuário
+                            </th>
+
+                            <th>
+                                Ação
+                            </th>
+
+                            <th>
+                                Entidade
+                            </th>
+
+                            <th>
+                                ID
+                            </th>
+
+                            <th>
+                                Descrição
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for log in logs %}
+
+                        <tr>
+
+
+                            <!-- Data -->
+
+                            <td>
+                                {{ log.created_at | local_datetime }}
+                            </td>
+
+
+                            <!-- Usuário -->
+
+                            <td>
+
+                                {% if log.user %}
+
+                                    <div class="audit-user">
+
+                                        <div class="audit-user-avatar">
+
+                                            {{ log.user.username[0]|upper }}
+
+                                        </div>
+
+
+                                        <span>
+                                            {{ log.user.username }}
+                                        </span>
+
+                                    </div>
+
+                                {% else %}
+
+                                    <span class="audit-muted">
+                                        Sistema
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Ação -->
+
+                            <td>
+
+                                {% if log.action == "CREATE" %}
+
+                                    <span class="audit-action audit-action-create">
+                                        Criado
+                                    </span>
+
+                                {% elif log.action == "UPDATE" %}
+
+                                    <span class="audit-action audit-action-update">
+                                        Alterado
+                                    </span>
+
+                                {% elif log.action == "ACTIVATE" %}
+
+                                    <span class="audit-action audit-action-activate">
+                                        Ativado
+                                    </span>
+
+                                {% elif log.action == "DEACTIVATE" %}
+
+                                    <span class="audit-action audit-action-deactivate">
+                                        Desativado
+                                    </span>
+
+                                {% elif log.action == "DELETE" %}
+
+                                    <span class="audit-action audit-action-delete">
+                                        Excluído
+                                    </span>
+
+                                {% elif log.action == "REVERSE" %}
+
+                                    <span class="audit-action audit-action-reverse">
+                                        Estorno
+                                    </span>
+
+                                {% elif log.action == "INVENTORY" %}
+
+                                    <span class="audit-action audit-action-inventory">
+                                        Inventário
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="audit-action">
+                                        {{ log.action }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Entidade -->
+
+                            <td>
+
+                                <span class="audit-entity">
+
+                                    {% if log.entity_type == "Product" %}
+
+                                        <i class="bi bi-box-seam"></i>
+                                        Produto
+
+                                    {% elif log.entity_type == "Category" %}
+
+                                        <i class="bi bi-tags"></i>
+                                        Categoria
+
+                                    {% elif log.entity_type == "StockMovement" %}
+
+                                        <i class="bi bi-arrow-left-right"></i>
+                                        Movimentação
+
+                                    {% else %}
+
+                                        {{ log.entity_type }}
+
+                                    {% endif %}
+
+                                </span>
+
+                            </td>
+
+
+                            <!-- ID -->
+
+                            <td>
+
+                                {% if log.entity_id %}
+
+                                    <span class="audit-entity-id">
+                                        #{{ log.entity_id }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="audit-muted">
+                                        -
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Descrição -->
+
+                            <td>
+
+                                <span class="audit-description">
+                                    {{ log.description }}
+                                </span>
+
+                            </td>
+
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- =================================================
+                 PAGINAÇÃO
+                 ================================================= -->
+
+            {% if pagination.pages > 1 %}
+
+            <div class="audit-pagination">
+
+
+                <div class="audit-pagination-info">
+
+                    Mostrando
+                    {{ pagination.first }}
+                    –
+                    {{ pagination.last }}
+                    de
+                    {{ pagination.total }}
+                    registros
+
+                </div>
+
+
+                <nav aria-label="Paginação da auditoria">
+
+                    <ul class="pagination pagination-sm mb-0">
+
+
+                        <!-- Anterior -->
+
+                        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+
+                            <a
+                                class="page-link"
+                                href="{% if pagination.has_prev %}
+                                    {{ url_for(
+                                        'audit.index',
+                                        page=pagination.prev_num,
+                                        action=selected_action,
+                                        entity_type=selected_entity_type,
+                                        user_id=selected_user_id,
+                                        start_date=start_date,
+                                        end_date=end_date
+                                    ) }}
+                                {% else %}
+                                    #
+                                {% endif %}"
+                            >
+                                Anterior
+                            </a>
+
+                        </li>
+
+
+                        <!-- Páginas -->
+
+                        {% for page_num in pagination.iter_pages(
+                            left_edge=1,
+                            right_edge=1,
+                            left_current=2,
+                            right_current=2
+                        ) %}
+
+
+                            {% if page_num %}
+
+                                <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+
+                                    <a
+                                        class="page-link"
+                                        href="{{ url_for(
+                                            'audit.index',
+                                            page=page_num,
+                                            action=selected_action,
+                                            entity_type=selected_entity_type,
+                                            user_id=selected_user_id,
+                                            start_date=start_date,
+                                            end_date=end_date
+                                        ) }}"
+                                    >
+                                        {{ page_num }}
+                                    </a>
+
+                                </li>
+
+                            {% else %}
+
+                                <li class="page-item disabled">
+
+                                    <span class="page-link">
+                                        …
+                                    </span>
+
+                                </li>
+
+                            {% endif %}
+
+
+                        {% endfor %}
+
+
+                        <!-- Próxima -->
+
+                        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+
+                            <a
+                                class="page-link"
+                                href="{% if pagination.has_next %}
+                                    {{ url_for(
+                                        'audit.index',
+                                        page=pagination.next_num,
+                                        action=selected_action,
+                                        entity_type=selected_entity_type,
+                                        user_id=selected_user_id,
+                                        start_date=start_date,
+                                        end_date=end_date
+                                    ) }}
+                                {% else %}
+                                    #
+                                {% endif %}"
+                            >
+                                Próxima
+                            </a>
+
+                        </li>
+
+
+                    </ul>
+
+                </nav>
+
+            </div>
+
+            {% endif %}
+
+
+        {% else %}
+
+
+            <!-- =================================================
+                 ESTADO VAZIO
+                 ================================================= -->
+
+            <div class="audit-empty-state">
+
+
+                <div class="audit-empty-icon">
+
+                    <i class="bi bi-shield-check"></i>
+
+                </div>
+
+
+                <h3>
+                    Nenhum registro encontrado
+                </h3>
+
+
+                <p>
+
+                    {% if
+                        selected_action
+                        or selected_entity_type
+                        or selected_user_id
+                        or start_date
+                        or end_date
+                    %}
+
+                        Não encontramos registros para os filtros selecionados.
+
+                    {% else %}
+
+                        As ações auditadas do sistema aparecerão aqui.
+
+                    {% endif %}
+
+                </p>
+
+
+                {% if
+                    selected_action
+                    or selected_entity_type
+                    or selected_user_id
+                    or start_date
+                    or end_date
+                %}
+
+                    <a
+                        href="{{ url_for('audit.index') }}"
+                        class="btn btn-primary"
+                    >
+                        Limpar filtros
+                    </a>
+
+                {% endif %}
+
+
+            </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+</div>
+
+{% endblock %}

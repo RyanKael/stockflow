@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="categories-page">
+
+
+    <!-- =====================================================
+         CABEÇALHO
+         ===================================================== -->
+
+    <div class="categories-header">
+
+        <div>
+
+            <h1 class="categories-title">
+                Categorias
+            </h1>
+
+            <p class="categories-subtitle">
+                Organize e gerencie as categorias dos produtos.
+            </p>
+
+        </div>
+
+
+        {% if current_user.role.name in ["ADMIN", "MANAGER"] %}
+
+        <a
+            href="{{ url_for('categories.new_category') }}"
+            class="btn btn-primary categories-new-button"
+        >
+            <i class="bi bi-plus-lg"></i>
+
+            Nova categoria
+        </a>
+
+        {% endif %}
+
+    </div>
+
+
+
+    <!-- =====================================================
+         TABELA
+         ===================================================== -->
+
+    <div class="categories-table-card">
+
+
+        <!-- Cabeçalho da tabela -->
+
+        <div class="categories-table-header">
+
+            <div>
+
+                <h2 class="categories-table-title">
+                    Categorias cadastradas
+                </h2>
+
+                <p class="categories-table-subtitle">
+                    Categorias disponíveis para organização do estoque.
+                </p>
+
+            </div>
+
+
+            <span class="categories-count">
+
+                {{ categories|length }}
+
+                categoria{{ "" if categories|length == 1 else "s" }}
+
+            </span>
+
+        </div>
+
+
+
+        {% if categories %}
+
+
+            <!-- Aviso mobile -->
+
+            <div class="categories-mobile-scroll-hint">
+
+                <i class="bi bi-arrow-left-right"></i>
+
+                Deslize para ver mais
+
+            </div>
+
+
+
+            <div class="table-responsive">
+
+                <table class="table align-middle mb-0">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Categoria
+                            </th>
+
+                            <th>
+                                Produtos
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th class="text-end">
+                                Ações
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for category in categories %}
+
+                            <tr>
+
+
+                                <!-- Categoria -->
+
+                                <td>
+
+                                    <div class="category-name">
+
+                                        <div class="category-icon">
+
+                                            <i class="bi bi-tag"></i>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <div class="category-name-text">
+                                                {{ category.name }}
+                                            </div>
+
+                                            <div class="category-id">
+                                                ID #{{ category.id }}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+
+                                <!-- Produtos -->
+
+                                <td>
+
+                                    <span class="category-product-count">
+
+                                        {{ category.products|length }}
+
+                                        produto{{ "" if category.products|length == 1 else "s" }}
+
+                                    </span>
+
+                                </td>
+
+
+
+                                <!-- Status -->
+
+                                <td>
+
+                                    {% if category.active %}
+
+                                        <span class="category-status category-status-active">
+
+                                            <span class="category-status-dot"></span>
+
+                                            Ativa
+
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="category-status category-status-inactive">
+
+                                            <span class="category-status-dot"></span>
+
+                                            Inativa
+
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+
+                                <!-- Ações -->
+
+                                <td class="text-end">
+
+                                    <a
+                                        href="{{ url_for(
+                                            'categories.edit_category',
+                                            id=category.id
+                                        ) }}"
+                                        class="btn btn-sm btn-secondary category-edit-button"
+                                        title="Editar categoria"
+                                    >
+
+                                        <i class="bi bi-pencil"></i>
+
+                                        Editar
+
+                                    </a>
+
+                                </td>
+
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+        {% else %}
+
+
+            <!-- Estado vazio -->
+
+            <div class="categories-empty-state">
+
+                <div class="categories-empty-icon">
+
+                    <i class="bi bi-tags"></i>
+
+                </div>
+
+
+                <h3>
+                    Nenhuma categoria cadastrada
+                </h3>
+
+
+                <p>
+                    Cadastre categorias para organizar melhor os produtos
+                    do estoque.
+                </p>
+
+
+                <a
+                    href="{{ url_for('categories.new_category') }}"
+                    class="btn btn-primary"
+                >
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Nova categoria
+
+                </a>
+
+            </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+</div>
+
+{% endblock %}
