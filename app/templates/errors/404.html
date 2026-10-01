@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 
+
 {% block title %}
 Página não encontrada
 {% endblock %}
 
-{% block content %}
+
+{% macro error_404_content() %}
 
 <div class="error-page">
 
@@ -29,6 +31,8 @@ Página não encontrada
 
         <div class="error-actions">
 
+            {% if current_user.is_authenticated %}
+
             <a
                 href="{{ url_for('main.dashboard') }}"
                 class="btn btn-primary"
@@ -36,6 +40,18 @@ Página não encontrada
                 <i class="bi bi-grid-1x2"></i>
                 Voltar ao Dashboard
             </a>
+
+            {% else %}
+
+            <a
+                href="{{ url_for('auth.login') }}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-box-arrow-in-right"></i>
+                Ir para o login
+            </a>
+
+            {% endif %}
 
             <a
                 href="javascript:history.back()"
@@ -51,4 +67,14 @@ Página não encontrada
 
 </div>
 
+{% endmacro %}
+
+
+{% block content %}
+    {{ error_404_content() }}
+{% endblock %}
+
+
+{% block login_content %}
+    {{ error_404_content() }}
 {% endblock %}
