@@ -2,6 +2,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from flask import Blueprint, render_template
+from flask_login import login_required
 
 from app.extensions import db
 from app.models.product import Product
@@ -11,6 +12,7 @@ main = Blueprint("main", __name__)
 
 
 @main.route("/")
+@login_required
 def index():
 
     return render_template(
@@ -18,6 +20,7 @@ def index():
     )
 
 @main.route("/dashboard")
+@login_required
 def dashboard():
 
     #Produtos ativos
