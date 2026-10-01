@@ -127,9 +127,14 @@ def list_products():
     # Ordenação
     #--------------------
 
+    if db.engine.dialect.name == "sqlite":
+        name_sort_column = Product.name.collate("PTBR")
+    else:
+        name_sort_column = Product.name
+
     sort_columns = {
+        "name": name_sort_column,
         "code": Product.code,
-        "name": Product.name.collate("PTBR"),
         "quantity": Product.quantity,
         "minimum_stock": Product.minimum_stock,
     }
@@ -159,9 +164,7 @@ def list_products():
         type=int,
     )
 
-    pagination = query.order_by(
-            order_by
-    ).paginate(
+    pagination = query.paginate(
         page=page,
         per_page=20,
         error_out=False,
@@ -888,13 +891,7 @@ def export_pdf():
             Product.active.is_(False)
         )
 
-    products_list = (
-        query
-        .order_by(
-            Product.name.collate("PTBR").asc()
-        )
-        .all()
-    )
+    products_list = query.all()
 
     #=======================
     #INFORMAÇÕES DOS FILTROS
