@@ -111,6 +111,73 @@ stockflow/
 ├── run.py
 ├── requirements.txt
 └── README.md
+```
+
+## Como executar o projeto localmente
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/RyanKael/stockflow.git
+```
+
+Entre na pasta:
+
+```bash
+cd stockflow
+```
+
+### 2. Crie o ambiente virtual
+
+```bash
+python -m venv .venv
+```
+
+No Windows, ative com:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+### 3. Instale as dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure as variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
+FLASK_CONFIG=development
+FLASK_DEBUG=1
+SECRET_KEY=sua-chave-local
+```
+
+### 5. Execute as migrations
+
+```bash
+flask --app run db upgrade
+```
+
+### 6. Crie um usuário administrador
+
+```bash
+flask --app run create-admin
+```
+
+### 7. Inicie a aplicação
+
+```bash
+flask run
+```
+
+A aplicação ficará disponível em:
+
+```text
+http://127.0.0.1:5000
+```
 
 ## Ambiente de produção
 
