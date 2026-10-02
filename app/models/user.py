@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.extensions import db
+from app.utils.datetime_utils import utc_now
 
 if TYPE_CHECKING:
 
@@ -56,7 +57,7 @@ class User(UserMixin, db.Model):
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow,
+        default=utc_now,
         nullable=False,
     )
 

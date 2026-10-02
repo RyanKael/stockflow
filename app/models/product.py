@@ -6,6 +6,7 @@ from sqlalchemy import Boolean, CheckConstraint, DateTime, Integer, String, Text
 from sqlalchemy import ForeignKey
 
 from app.extensions import db
+from app.utils.datetime_utils import utc_now
 
 if TYPE_CHECKING:
     from app.models.stock_movement import StockMovement
@@ -33,9 +34,9 @@ class Product(db.Model):
         unique=True,
         nullable=False,
     )
-    
+
     name: Mapped[str] = mapped_column(
-        String(120), 
+        String(120),
         nullable=False,
     )
 
@@ -62,12 +63,12 @@ class Product(db.Model):
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        default = datetime.utcnow,
+        default = utc_now,
     )
 
     updated_at: Mapped[datetime] = mapped_column(
-        default = datetime.utcnow,
-        onupdate = datetime.utcnow,
+        default = utc_now,
+        onupdate = utc_now,
     )
 
     movements: Mapped[list["StockMovement"]] = relationship(

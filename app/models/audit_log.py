@@ -6,6 +6,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.extensions import db
+from app.utils.datetime_utils import utc_now
 
 
 if TYPE_CHECKING:
@@ -47,7 +48,7 @@ class AuditLog(db.Model):
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow,
+        default=utc_now,
         nullable=False,
     )
 

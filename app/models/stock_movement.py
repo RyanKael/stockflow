@@ -8,6 +8,7 @@ from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.extensions import db
+from app.utils.datetime_utils import utc_now
 
 
 if TYPE_CHECKING:
@@ -77,5 +78,5 @@ class StockMovement(db.Model):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow,
+        default=utc_now,
     )

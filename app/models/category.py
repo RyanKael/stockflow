@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.extensions import db
+from app.utils.datetime_utils import utc_now
 
 if TYPE_CHECKING:
     from app.models.product import Product
@@ -29,7 +30,7 @@ class Category(db.Model):
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow,
+        default=utc_now,
         nullable=False,
     )
 
