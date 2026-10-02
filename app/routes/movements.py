@@ -2,7 +2,7 @@ from flask_login import login_required, current_user
 from app.utils.auth import role_required
 from app.models.user import UserRole
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -413,12 +413,13 @@ def new_movement():
 
             db.session.commit()
 
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
 
             db.session.rollback()
 
-            print("ERRO AO REGISTRAR MOVIMENTAÇÃO:")
-            print(e)
+            current_app.logger.exception(
+                "Erro ao registrar movimentação."
+            )
 
             flash(
                 "Não foi possível registrar a movimentação.\n"
