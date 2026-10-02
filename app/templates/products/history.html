@@ -225,7 +225,7 @@ Histórico do Produto
 
             <span class="product-history-count">
                 {{ pagination.total }}
-                movimentação{{ "" if pagination.total == 1 else "ões" }}
+                {{ "movimentação" if pagination.total == 1 else "movimentações" }}
             </span>
 
         </div>
