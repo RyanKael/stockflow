@@ -457,6 +457,7 @@ def export_pdf():
             except ValueError:
                 pass
 
+        local_tz = ZoneInfo("America/Sao_Paulo")
         #Filtro por data inicial
 
         if start_date_filter:
@@ -466,18 +467,25 @@ def export_pdf():
                     "%Y-%m-%d"
                 ).date()
 
+                start_local = datetime.combine(
+                    start_date,
+                    time.min,
+                    tzinfo=local_tz,
+                )
+
+                start_utc = start_local.astimezone(
+                    timezone.utc
+                ).replace(tzinfo=None)
+
                 query = query.filter(
-                    StockMovement.created_at >= datetime.combine(
-                        start_date,
-                        time.min
-                    )
+                    StockMovement.created_at >= start_utc
                 )
 
             except ValueError:
                 pass
 
 
-        #Filtro por data final
+        # Filtro por data final
 
         if end_date_filter:
             try:
@@ -486,11 +494,18 @@ def export_pdf():
                     "%Y-%m-%d"
                 ).date()
 
+                end_local = datetime.combine(
+                    end_date,
+                    time.max,
+                    tzinfo=local_tz,
+                )
+
+                end_utc = end_local.astimezone(
+                    timezone.utc
+                ).replace(tzinfo=None)
+
                 query = query.filter(
-                    StockMovement.created_at <= datetime.combine(
-                        end_date,
-                        time.max
-                    )
+                    StockMovement.created_at <= end_utc
                 )
 
             except ValueError:
