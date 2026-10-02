@@ -77,7 +77,7 @@ def dashboard():
         db.func.date(StockMovement.created_at) == today,
     ).scalar() or 0
 
-    today_balance = exits_today - exits_today
+    today_balance = entries_today - exits_today
 
 
     return render_template(
