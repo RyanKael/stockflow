@@ -75,6 +75,67 @@ O sistema foi desenvolvido para centralizar o controle de produtos, movimentaç�
 - Railway
 - GitHub
 
+## Arquitetura
+
+O StockFlow foi organizado em camadas para separar responsabilidades e facilitar a manutenção do projeto.
+
+A aplicação utiliza Flask com Blueprints para dividir as rotas por módulo, SQLAlchemy para acesso ao banco de dados e Jinja2 para renderização das páginas.
+
+```text
+Usuário
+  │
+  ▼
+Templates / Interface
+  │
+  ▼
+Flask + Blueprints
+  │
+  ├── Autenticação
+  ├── Produtos
+  ├── Movimentações
+  ├── Inventário
+  ├── Auditoria
+  └── Relatórios
+  │
+  ▼
+SQLAlchemy
+  │
+  ▼
+SQLite / PostgreSQL
+```
+
+### Arquitetura em produção
+
+```text
+Navegador
+   │
+   ▼
+Railway
+   │
+   ▼
+Gunicorn
+   │
+   ▼
+Flask
+   │
+   ▼
+SQLAlchemy
+   │
+   ▼
+PostgreSQL
+```
+
+### Organização da aplicação
+
+- `routes/`: concentra as rotas e regras de cada módulo da aplicação;
+- `models/`: define as entidades e relacionamentos do banco de dados;
+- `forms/`: contém os formulários e validações;
+- `templates/`: reúne as páginas HTML renderizadas com Jinja2;
+- `static/`: armazena arquivos CSS, imagens e recursos visuais;
+- `utils/`: concentra funções auxiliares reutilizadas pela aplicação;
+- `migrations/`: controla a evolução da estrutura do banco de dados;
+- `tests/`: contém os testes automatizados do sistema.
+
 ## Segurança
 
 O StockFlow possui medidas de segurança para proteger o acesso e as operações do sistema:
