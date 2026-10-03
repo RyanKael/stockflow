@@ -4,33 +4,19 @@
 
 Sistema web para controle e gestão de estoque, desenvolvido com Python e Flask.
 
+## Acesso rápido
+
+- [Aplicação em produção](https://stockflow-production-75ac.up.railway.app)
+- [Roteiro de demonstração](docs/demo.md)
+- [Apresentação para portfólio](docs/portfolio.md)
+
+[![Tests](https://github.com/RyanKael/stockflow/actions/workflows/tests.yml/badge.svg)](https://github.com/RyanKael/stockflow/actions/workflows/tests.yml)
+
 ## Sobre o projeto
 
 O StockFlow surgiu a partir de um problema real de controle de materiais em estoque, onde produtos eram armazenados sem um acompanhamento adequado das entradas e saídas.
 
 O sistema foi desenvolvido para centralizar o controle de produtos, movimentações, inventário, usuários, auditoria e relatórios, permitindo maior organização e rastreabilidade das operações.
-
-## Demonstração
-
-### Dashboard
-
-![Dashboard do StockFlow](docs/screenshots/dashboard.png)
-
-### Produtos
-
-![Tela de produtos do StockFlow](docs/screenshots/produtos.png)
-
-### Movimentações
-
-![Tela de movimentações do StockFlow](docs/screenshots/movimentacoes.png)
-
-### Relatórios
-
-![Tela de relatórios do StockFlow](docs/screenshots/relatorios.png)
-
-### Auditoria
-
-![Tela de auditoria do StockFlow](docs/screenshots/auditoria.png)
 
 ## Funcionalidades principais
 
@@ -173,6 +159,28 @@ Entre os cenários testados estão:
 - bloqueio de estorno duplicado;
 - permissões de usuários;
 - criação e edição de produtos.
+
+## Demonstração
+
+### Dashboard
+
+![Dashboard do StockFlow](docs/screenshots/dashboard.png)
+
+### Produtos
+
+![Tela de produtos do StockFlow](docs/screenshots/produtos.png)
+
+### Movimentações
+
+![Tela de movimentações do StockFlow](docs/screenshots/movimentacoes.png)
+
+### Relatórios
+
+![Tela de relatórios do StockFlow](docs/screenshots/relatorios.png)
+
+### Auditoria
+
+![Tela de auditoria do StockFlow](docs/screenshots/auditoria.png)
 
 ## Estrutura do projeto
 
