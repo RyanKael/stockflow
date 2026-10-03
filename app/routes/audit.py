@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, time, timezone
+from zoneinfo import ZoneInfo
 
 from flask import Blueprint, render_template, request
 
@@ -75,17 +76,32 @@ def index():
             AuditLog.user_id == user_id
         )
 
+    local_tz = ZoneInfo("America/Sao_Paulo")
+
+
     if start_date:
 
         try:
 
-            start_datetime = datetime.strptime(
+            start_date_value = datetime.strptime(
                 start_date,
                 "%Y-%m-%d",
+            ).date()
+
+            start_local = datetime.combine(
+                start_date_value,
+                time.min,
+                tzinfo=local_tz,
+            )
+
+            start_utc = (
+                start_local
+                .astimezone(timezone.utc)
+                .replace(tzinfo=None)
             )
 
             query = query.filter(
-                AuditLog.created_at >= start_datetime
+                AuditLog.created_at >= start_utc
             )
 
         except ValueError:
@@ -96,19 +112,25 @@ def index():
 
         try:
 
-            end_datetime = datetime.strptime(
+            end_date_value = datetime.strptime(
                 end_date,
                 "%Y-%m-%d",
+            ).date()
+
+            end_local = datetime.combine(
+                end_date_value,
+                time.max,
+                tzinfo=local_tz,
             )
 
-            end_datetime = end_datetime.replace(
-                hour=23,
-                minute=59,
-                second=59,
+            end_utc = (
+                end_local
+                .astimezone(timezone.utc)
+                .replace(tzinfo=None)
             )
 
             query = query.filter(
-                AuditLog.created_at <= end_datetime
+                AuditLog.created_at <= end_utc
             )
 
         except ValueError:
