@@ -12,6 +12,9 @@ Sistema web para controle e gestão de estoque, desenvolvido com Python e Flask.
 
 [![Tests](https://github.com/RyanKael/stockflow/actions/workflows/tests.yml/badge.svg)](https://github.com/RyanKael/stockflow/actions/workflows/tests.yml)
 
+[![Release](https://img.shields.io/github/v/release/RyanKael/stockflow)](https://github.com/RyanKael/stockflow/releases)
+[![License](https://img.shields.io/github/license/RyanKael/stockflow)](LICENSE)
+
 ## Sobre o projeto
 
 O StockFlow surgiu a partir de um problema real de controle de materiais em estoque, onde produtos eram armazenados sem um acompanhamento adequado das entradas e saídas.
