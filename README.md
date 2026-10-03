@@ -8,6 +8,28 @@ O StockFlow surgiu a partir de um problema real de controle de materiais em esto
 
 O sistema foi desenvolvido para centralizar o controle de produtos, movimentações, inventário, usuários, auditoria e relatórios, permitindo maior organização e rastreabilidade das operações.
 
+## Demonstração
+
+### Dashboard
+
+![Dashboard do StockFlow](docs/screenshots/dashboard.png)
+
+### Produtos
+
+![Tela de produtos do StockFlow](docs/screenshots/produtos.png)
+
+### Movimentações
+
+![Tela de movimentações do StockFlow](docs/screenshots/movimentacoes.png)
+
+### Relatórios
+
+![Tela de relatórios do StockFlow](docs/screenshots/relatorios.png)
+
+### Auditoria
+
+![Tela de auditoria do StockFlow](docs/screenshots/auditoria.png)
+
 ## Funcionalidades principais
 
 - Dashboard com visão geral do estoque
