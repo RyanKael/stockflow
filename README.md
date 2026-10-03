@@ -1,3 +1,5 @@
+![StockFlow](docs/images/stockflow-banner.jpg)
+
 # StockFlow
 
 Sistema web para controle e gestão de estoque, desenvolvido com Python e Flask.
