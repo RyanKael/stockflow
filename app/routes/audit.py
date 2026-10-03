@@ -201,7 +201,7 @@ def index():
         actions=actions,
         entity_types=entity_types,
         selected_action=action,
-        setected_entity_type=entity_type,
+        selected_entity_type=entity_type,
         selected_user_id=user_id,
         start_date=start_date,
         end_date=end_date,
